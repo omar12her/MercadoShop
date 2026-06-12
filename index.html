@@ -234,7 +234,6 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 </style>
 </head>
 <body>
-<!-- (Mismo HTML, sin cambios en la estructura) -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lb-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
   <button class="lb-prev" onclick="event.stopPropagation();lbNav(-1)"><i class="fas fa-chevron-left"></i></button>
@@ -335,7 +334,6 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 </nav>
 <div class="wsp-float" onclick="window.open('https://wa.me/522727224580?text=Hola%20MercadoShop%20quiero%20información','_blank')"><i class="fab fa-whatsapp"></i></div>
 
-<!-- DRAWERS (misma estructura) -->
 <div class="drawer" id="drawerProd"><div class="dhandle"></div><div id="prodDetailContent"></div></div>
 <div class="drawer" id="drawerCart"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">🛒 Mi Carrito</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div><div id="cartContent"></div></div>
 <div class="drawer" id="drawerAddProd"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">➕ Nuevo Producto</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div>
@@ -418,8 +416,9 @@ const ROUTES=[{day:'14',month:'JUN',community:'San Juan Mixtepec'},{day:'15',mon
 
 let products=[],cart=[],favs=[],orders=[],profile={};
 let isAdmin=false,curProd=null,detQty=1,selPay='transferencia',carIdx=0,carTimer,tempNewImages=[],editImages=[],galleryIdx=0,selectedVariants={},lbImages=[],lbIdx=0;
+let backPressTimer = 0;
 
-// 🆕 COMPRESOR DE IMÁGENES (mejorado)
+// COMPRESOR DE IMÁGENES
 function compressImage(base64, maxWidth=800, quality=0.6){
   return new Promise((resolve) => {
     const img = new Image();
@@ -457,7 +456,7 @@ function fmt(n){return Number(n).toLocaleString('es-MX')}
 function pct(p,o){return o?Math.round((1-p/o)*100):0}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
 
-// ... (lightbox, tags, etc., igual que antes) ...
+// LIGHTBOX Y TAGS
 function openLightbox(images,idx){lbImages=images;lbIdx=idx;document.getElementById('lbImg').src=lbImages[lbIdx];document.getElementById('lightbox').classList.add('show');document.body.style.overflow='hidden'}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('show');document.body.style.overflow='';lbImages=[]}
 function lbNav(d){lbIdx+=d;if(lbIdx<0)lbIdx=lbImages.length-1;if(lbIdx>=lbImages.length)lbIdx=0;document.getElementById('lbImg').src=lbImages[lbIdx]}
@@ -472,11 +471,30 @@ window.addEventListener('load',()=>{
   CATS.forEach(c=>{['nCat','eCat'].forEach(id=>{const sel=document.getElementById(id);if(sel){const o=document.createElement('option');o.value=c.id;o.textContent=c.icon+' '+c.id;sel.appendChild(o)}})});
   isAdmin=sessionStorage.getItem('ms_admin')==='1'; updateAdminUI();
   document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
-  window.addEventListener('popstate',e=>{if(document.querySelector('.drawer.show')){closeDrawers();history.pushState({drawerOpen:false},'',window.location.href)}});
-  history.replaceState({drawerOpen:false},'',window.location.href); renderOrderHistory();
+  
+  // MANEJO MEJORADO DEL BOTÓN REGRESAR
+  window.addEventListener('popstate', function(e) {
+    if (document.querySelector('.drawer.show')) {
+      closeDrawers();
+      history.pushState({ drawerOpen: false }, '', window.location.href);
+    } else if (document.getElementById('page-home').classList.contains('active')) {
+      const now = Date.now();
+      if (now - backPressTimer < 2000) {
+        history.back();
+      } else {
+        backPressTimer = now;
+        toast('↩ Presiona de nuevo para salir');
+        history.pushState({ home: true }, '', window.location.href);
+      }
+    } else {
+      goHome();
+      history.pushState({ page: 'home' }, '', window.location.href);
+    }
+  });
+  history.replaceState({ home: true }, '', window.location.href);
+  renderOrderHistory();
 });
 
-// ... (funciones de carrusel, build, etc., sin cambios) ...
 function updateFreeShipBar(){
   const total=cart.reduce((s,c)=>{const p=products.find(x=>String(x.id)===String(c.id));return s+(p?p.price*c.qty:0)},0);
   const falta=FREE_SHIP_MIN-total;
@@ -493,14 +511,22 @@ function buildOffers(){const e=document.getElementById('offersRow');if(!e)return
 function buildGrid(id,list){const e=document.getElementById(id);if(!e)return;if(!list.length){e.innerHTML='<div class="empty" style="grid-column:1/-1;"><i class="fas fa-box-open"></i><p>Pronto más</p></div>';return}e.innerHTML=list.map(p=>prodCard(p)).join('')}
 function buildBest(){buildGrid('bestGrid',products.filter(p=>p.isBest))}
 function buildNew(){buildGrid('newGrid',products.filter(p=>p.isNew))}
-function getImg(p){if(p.images&&p.images.length>0)return`<img src="${p.images[0]}" loading="lazy" alt="${p.name}" onclick="event.stopPropagation();openLightbox(${JSON.stringify(p.images).replace(/"/g,'&quot;')},0)">`;return p.emoji||'📦'}
+
+// IMAGEN SIN LIGHTBOX (catálogo, carrito)
+function getImg(p) {
+  if (p.images && p.images.length > 0) {
+    return `<img src="${p.images[0]}" loading="lazy" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;">`;
+  }
+  return p.emoji || '📦';
+}
+
 function prodCard(p){const f=favs.includes(String(p.id));return`<div class="pcard" onclick="openProd('${p.id}')"><div class="pimg">${getImg(p)}${p.oldPrice?`<div class="disc">-${pct(p.price,p.oldPrice)}%</div>`:''}<button class="fav ${f?'on':''}" onclick="event.stopPropagation();toggleFav('${p.id}',this)"><i class="fas fa-heart"></i></button></div><div class="pinfo"><div class="pname">${p.name}</div><div class="pprice">$${fmt(p.price)}</div>${p.oldPrice?`<div class="pold">$${fmt(p.oldPrice)}</div>`:''}${p.stock<=5?`<div class="pstock">⚠️ Solo ${p.stock}</div>`:''}<div class="pdeliv">✅ ~${p.days||7} días</div><button class="btn-add" onclick="event.stopPropagation();addCart('${p.id}')"><i class="fas fa-cart-plus"></i> Agregar</button></div></div>`}
 
 function openProd(id){
   curProd=products.find(p=>String(p.id)===String(id));if(!curProd)return;
   detQty=1;galleryIdx=0;selectedVariants={};const p=curProd,imgs=(p.images&&p.images.length>0)?p.images:[p.emoji||'📦'];
   const imgsEscaped=JSON.stringify(imgs).replace(/"/g,'&quot;');
-  const slides=imgs.map((img,i)=>img.startsWith('data:')||img.startsWith('http')?`<div class="det-gallery-slide" onclick="openLightbox(${imgsEscaped},${i})"><img src="${img}" alt="${p.name}"></div>`:`<div class="det-gallery-slide" style="font-size:5rem;">${img}</div>`).join('');
+  const slides=imgs.map((img,i)=>img.startsWith('data:')||img.startsWith('http')?`<div class="det-gallery-slide" onclick="openLightbox(${imgsEscaped},${i})"><img src="${img}" alt="${p.name}"></div>`:`<div class="det-gallery-slide" style="font-size:5rem;" onclick="openLightbox(${imgsEscaped},${i})">${img}</div>`).join('');
   const dots=imgs.length>1?imgs.map((_,i)=>`<div class="gallery-dot ${i===0?'active':''}" onclick="goGallerySlide(${i})"></div>`).join(''):'';
   const nav=imgs.length>1?`<button class="gallery-nav gallery-prev" onclick="goGallerySlide(galleryIdx-1)"><i class="fas fa-chevron-left"></i></button><button class="gallery-nav gallery-next" onclick="goGallerySlide(galleryIdx+1)"><i class="fas fa-chevron-right"></i></button>`:'';
   const freeShip=p.price>=FREE_SHIP_MIN;
@@ -571,7 +597,7 @@ function checkPass(){if(document.getElementById('adminPassInput').value===ADMIN_
 function toggleEye(){const i=document.getElementById('adminPassInput'),ic=document.getElementById('eyeIcon');i.type=i.type==='password'?'text':'password';ic.className=i.type==='text'?'fas fa-eye-slash':'fas fa-eye'}
 function logoutAdmin(){isAdmin=false;sessionStorage.removeItem('ms_admin');updateAdminUI();showPage('perfil')}
 
-// ========== IMÁGENES (COMPRESIÓN ASEGURADA) ==========
+// IMÁGENES
 async function previewMultipleImgs(inp){
   if(!inp.files||!inp.files.length)return;
   for(const file of Array.from(inp.files)){
@@ -592,7 +618,6 @@ function renderAddImages(){
 }
 function removeNewImg(i){tempNewImages.splice(i,1);renderAddImages();}
 
-// 🆕 AGREGAR IMÁGENES EN EDICIÓN (CON COMPRESIÓN)
 async function addEditImages(inp){
   if(!inp.files||!inp.files.length)return;
   for(const file of Array.from(inp.files)){
@@ -613,14 +638,13 @@ function renderEditImages(){
 }
 function removeEditImg(i){editImages.splice(i,1);renderEditImages();}
 
-// ========== AGREGAR PRODUCTO (con compresión) ==========
+// AGREGAR PRODUCTO
 async function addProduct(){
   const n=document.getElementById('nName').value.trim(),p=parseFloat(document.getElementById('nPrice').value),op=parseFloat(document.getElementById('nOldPrice').value)||null,c=document.getElementById('nCat').value,d=document.getElementById('nDesc').value.trim(),s=parseInt(document.getElementById('nStock').value)||10,e=document.getElementById('nEmoji').value||'📦',io=document.getElementById('chkOffer').checked,ix=document.getElementById('chkNew').checked,ib=document.getElementById('chkBest').checked;
   const selSizes=Array.from(document.querySelectorAll('#sizeTags .tag-chip.sel')).map(el=>el.dataset.size);
   const selColors=Array.from(document.querySelectorAll('#colorSwatches .color-swatch.sel')).map(el=>el.dataset.color);
   let variants={};if(selSizes.length>0)variants.Talla=selSizes;if(selColors.length>0)variants.Color=selColors;if(Object.keys(variants).length===0)variants=null;
   if(!n||!p||!c){toast('❌ Completa los campos');return}
-  // Asegurar compresión final
   const finalImages = await Promise.all(tempNewImages.map(img => compressImage(img)));
   const newProduct={name:n,price:p,oldPrice:op,cat:c,emoji:e,stock:s,desc:d,variants,isOffer:io,isNew:ix,isBest:ib,days:7,images:finalImages};
   db.collection("products").add(newProduct).then(() => { toast('✅ Producto agregado'); loadProductsFromFirebase(); }).catch(() => toast('Error de conexión'));
@@ -655,11 +679,9 @@ function editProduct(id){
   openDrawer('drawerEditProd');
 }
 
-// 🆕 GUARDAR EDICIÓN (comprime todas las imágenes antes de guardar)
 async function saveEdit(){
   const id=String(document.getElementById('editId').value);
   if(!id){toast('❌ Error: ID no encontrado');return}
-  // Comprimir todas las imágenes del array editImages
   const finalImages = await Promise.all(editImages.map(img => compressImage(img)));
   const updatedData={
     name:document.getElementById('eName').value.trim(),

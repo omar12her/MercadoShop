@@ -285,6 +285,11 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
       </div>
       <div class="car-dots" id="carDots"></div>
     </div>
+    <!-- ANUNCIO DE PRÓXIMA ENTREGA (EDITABLE DESDE ADMIN) -->
+    <div id="anuncioBanner" style="margin:10px 12px;background:var(--blue-pale);border-radius:var(--r12);padding:11px 14px;display:none;align-items:center;gap:10px;color:var(--blue-dark);cursor:default;border:1px solid rgba(21,101,192,0.2);">
+      <i class="fas fa-truck" style="font-size:1.3rem;flex-shrink:0;"></i>
+      <div><strong id="anuncioTexto">Próxima entrega: Cargando...</strong></div>
+    </div>
     <div class="trust-row">
       <div class="trust-badge"><i class="fas fa-check-circle"></i> Entregas seguras</div>
       <div class="trust-badge"><i class="fas fa-truck"></i> Envío gratis +$500</div>
@@ -320,7 +325,11 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 </div></div></div>
 <div class="page" id="page-admin"><div class="sh"><span class="sh-title">Panel Admin</span><button onclick="logoutAdmin()" style="font-size:.7rem;color:var(--red);font-weight:700;background:var(--red-pale);padding:5px 12px;border-radius:var(--r50);">Salir</button></div>
   <div class="stat-row"><div class="sbox"><div class="slabel">Productos</div><div class="sval" id="adminProdCount">0</div></div><div class="sbox"><div class="slabel">Pedidos</div><div class="sval" id="adminOrderCount">0</div></div></div>
-  <div class="agrid"><div class="acard" onclick="openDrawer('drawerAddProd')"><i class="fas fa-plus-circle"></i><span>Agregar</span></div><div class="acard" onclick="showAdminSub('pedidos')"><i class="fas fa-receipt"></i><span>Pedidos</span></div></div>
+  <div class="agrid">
+    <div class="acard" onclick="openDrawer('drawerAddProd')"><i class="fas fa-plus-circle"></i><span>Agregar</span></div>
+    <div class="acard" onclick="showAdminSub('pedidos')"><i class="fas fa-receipt"></i><span>Pedidos</span></div>
+    <div class="acard" onclick="openDrawer('drawerAnuncio')"><i class="fas fa-bullhorn"></i><span>Anuncio</span></div>
+  </div>
   <div class="sh"><span class="sh-title">Productos</span></div><div style="padding:0 12px 20px;" id="adminProdList"></div>
 </div>
 <div class="page" id="page-pedidos-hist"><div class="sh"><span class="sh-title">Mis Pedidos</span><span class="sh-link" onclick="showPage('perfil')">← Volver</span></div><div style="padding:0 12px 20px;" id="orderHistory"></div></div>
@@ -332,7 +341,7 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
   <button class="nbtn" id="navCart" onclick="openCart()"><i class="fas fa-shopping-cart"></i>Carrito</button>
   <button class="nbtn" id="navPerfil" onclick="showPage('perfil')"><i class="fas fa-user"></i>Perfil</button>
 </nav>
-<div class="wsp-float" onclick="window.open('https://wa.me/522727224580?text=Hola%20MercadoShop%20quiero%20información','_blank')"><i class="fab fa-whatsapp"></i></div>
+<div class="wsp-float" onclick="window.open('https://wa.me/522724446924?text=Hola%20MercadoShop%20quiero%20información','_blank')"><i class="fab fa-whatsapp"></i></div>
 
 <div class="drawer" id="drawerProd"><div class="dhandle"></div><div id="prodDetailContent"></div></div>
 <div class="drawer" id="drawerCart"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">🛒 Mi Carrito</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div><div id="cartContent"></div></div>
@@ -364,6 +373,7 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
       <div class="color-swatch" style="background:#9e9e9e" data-color="Gris" onclick="toggleColor(this)"><span class="check"><i class="fas fa-check"></i></span></div>
     </div>
     <label class="flabel">Stock</label><input type="number" class="finput" id="nStock" value="10">
+    <label class="flabel">Tiempo de entrega (días)</label><input type="number" class="finput" id="nDays" value="7" min="1" max="60">
     <label class="flabel">Emoji</label><input type="text" class="finput" id="nEmoji" maxlength="2" placeholder="📦">
     <div style="display:flex;gap:12px;margin-top:10px;font-size:.8rem;"><label><input type="checkbox" id="chkOffer"> Oferta</label><label><input type="checkbox" id="chkNew" checked> Nuevo</label><label><input type="checkbox" id="chkBest"> Top</label></div>
     <button class="btn-add" style="margin-top:14px;border-radius:var(--r8);padding:14px;width:100%;background:var(--blue);font-size:.9rem;" onclick="addProduct()"><i class="fas fa-plus"></i> Agregar</button>
@@ -381,9 +391,21 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
     <label class="flabel">Categoría</label><select class="fselect" id="eCat"></select>
     <label class="flabel">Descripción</label><textarea class="finput" id="eDesc" rows="2"></textarea>
     <label class="flabel">Stock</label><input type="number" class="finput" id="eStock">
+    <label class="flabel">Tiempo de entrega (días)</label><input type="number" class="finput" id="eDays" value="7" min="1" max="60">
     <label class="flabel">Emoji</label><input type="text" class="finput" id="eEmoji" maxlength="2">
     <div style="display:flex;gap:12px;margin-top:10px;font-size:.8rem;"><label><input type="checkbox" id="eChkOffer"> Oferta</label><label><input type="checkbox" id="eChkNew"> Nuevo</label><label><input type="checkbox" id="eChkBest"> Top</label></div>
     <button class="btn-add" style="margin-top:14px;border-radius:var(--r8);padding:14px;width:100%;background:var(--blue);font-size:.9rem;" onclick="saveEdit()"><i class="fas fa-save"></i> Guardar cambios</button>
+  </div>
+</div>
+<!-- DRAWER PARA EDITAR ANUNCIO -->
+<div class="drawer" id="drawerAnuncio"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">📢 Editar Anuncio de Entrega</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div>
+  <div style="padding:0 16px 30px;">
+    <label class="flabel">Comunidad / Lugar</label><input type="text" class="finput" id="aComunidad" placeholder="Ej: San Juan Mixtepec">
+    <label class="flabel">Día (número)</label><input type="text" class="finput" id="aDia" placeholder="14">
+    <label class="flabel">Mes (ej: JUN, JUL)</label><input type="text" class="finput" id="aMes" placeholder="JUN">
+    <label class="flabel">Hora</label><input type="text" class="finput" id="aHora" placeholder="10:00 AM">
+    <button class="btn-add" style="margin-top:14px;border-radius:var(--r8);padding:14px;width:100%;background:var(--blue);font-size:.9rem;" onclick="saveAnuncio()"><i class="fas fa-save"></i> Guardar Anuncio</button>
+    <button class="btn-add" style="margin-top:8px;border-radius:var(--r8);padding:14px;width:100%;background:var(--red-pale);color:var(--red);font-size:.9rem;" onclick="eliminarAnuncio()"><i class="fas fa-trash"></i> Quitar Anuncio</button>
   </div>
 </div>
 <div class="drawer" id="drawerAdminLogin"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">🔐 Admin</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div>
@@ -393,7 +415,7 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
     <div style="position:relative;"><input type="password" class="finput" id="adminPassInput"><button onclick="toggleEye()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text2);"><i class="fas fa-eye" id="eyeIcon"></i></button></div>
     <div id="passErr" style="color:var(--red);font-size:.76rem;margin-top:6px;display:none;">❌ Incorrecta</div>
     <button class="btn-add" style="margin-top:12px;border-radius:var(--r8);padding:13px;width:100%;font-size:.88rem;" onclick="checkPass()"><i class="fas fa-unlock"></i> Entrar</button>
-    <div style="margin-top:14px;font-size:.7rem;color:var(--text2);">Contraseña: <strong>admin2024</strong></div>
+    <div style="margin-top:14px;font-size:.7rem;color:var(--text2);">Contraseña: <strong>omar123</strong></div>
   </div>
 </div>
 
@@ -468,6 +490,7 @@ window.addEventListener('load',()=>{
   cart=JSON.parse(localStorage.getItem('ms_cart')||'[]'); favs=JSON.parse(localStorage.getItem('ms_favs')||'[]');
   orders=JSON.parse(localStorage.getItem('ms_orders')||'[]'); profile=JSON.parse(localStorage.getItem('ms_profile')||'{}');
   loadProductsFromFirebase(); buildCatNav(); buildCatGrid(); updateBadge(); loadProfile(); initCarousel(); buildRoutesMini(); updateFreeShipBar();
+  loadAnuncio(); // Cargar anuncio desde Firebase
   CATS.forEach(c=>{['nCat','eCat'].forEach(id=>{const sel=document.getElementById(id);if(sel){const o=document.createElement('option');o.value=c.id;o.textContent=c.icon+' '+c.id;sel.appendChild(o)}})});
   isAdmin=sessionStorage.getItem('ms_admin')==='1'; updateAdminUI();
   document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
@@ -495,6 +518,47 @@ window.addEventListener('load',()=>{
   renderOrderHistory();
 });
 
+// Cargar anuncio desde Firebase
+function loadAnuncio(){
+  db.collection("anuncio").doc("actual").get().then(doc => {
+    const banner = document.getElementById('anuncioBanner');
+    const texto = document.getElementById('anuncioTexto');
+    if(doc.exists && doc.data().activo !== false){
+      const a = doc.data();
+      texto.textContent = `Próxima entrega: ${a.comunidad||'N/A'} el ${a.dia||'?'} de ${a.mes||'???'} a las ${a.hora||'??'}`;
+      banner.style.display = 'flex';
+    } else {
+      banner.style.display = 'none';
+    }
+  }).catch(() => {});
+}
+
+function saveAnuncio(){
+  const comunidad = document.getElementById('aComunidad').value.trim();
+  const dia = document.getElementById('aDia').value.trim();
+  const mes = document.getElementById('aMes').value.trim();
+  const hora = document.getElementById('aHora').value.trim();
+  if(!comunidad || !dia || !mes || !hora){
+    toast('❌ Completa todos los campos');
+    return;
+  }
+  db.collection("anuncio").doc("actual").set({
+    comunidad, dia, mes, hora, activo: true
+  }).then(() => {
+    toast('✅ Anuncio guardado');
+    loadAnuncio();
+    closeDrawers();
+  }).catch(() => toast('Error al guardar'));
+}
+
+function eliminarAnuncio(){
+  db.collection("anuncio").doc("actual").set({activo:false}, {merge:true}).then(() => {
+    toast('🗑️ Anuncio eliminado');
+    loadAnuncio();
+    closeDrawers();
+  }).catch(() => toast('Error'));
+}
+
 function updateFreeShipBar(){
   const total=cart.reduce((s,c)=>{const p=products.find(x=>String(x.id)===String(c.id));return s+(p?p.price*c.qty:0)},0);
   const falta=FREE_SHIP_MIN-total;
@@ -512,7 +576,6 @@ function buildGrid(id,list){const e=document.getElementById(id);if(!e)return;if(
 function buildBest(){buildGrid('bestGrid',products.filter(p=>p.isBest))}
 function buildNew(){buildGrid('newGrid',products.filter(p=>p.isNew))}
 
-// IMAGEN SIN LIGHTBOX (catálogo, carrito)
 function getImg(p) {
   if (p.images && p.images.length > 0) {
     return `<img src="${p.images[0]}" loading="lazy" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;">`;
@@ -547,7 +610,7 @@ function openProd(id){
     });
     variantsHtml+='</div>';
   }
-  document.getElementById('prodDetailContent').innerHTML=`<div class="det-gallery"><div class="det-gallery-track" id="galleryTrack">${slides}</div>${nav}${dots?`<div class="gallery-dots">${dots}</div>`:''}${p.oldPrice?`<div class="disc" style="position:absolute;top:10px;left:10px;z-index:6;">-${pct(p.price,p.oldPrice)}%</div>`:''}</div><div class="det-body"><div style="display:flex;justify-content:space-between;"><div class="det-name">${p.name}</div><button onclick="toggleFavDirect('${p.id}')" style="font-size:1.4rem;color:${favs.includes(String(p.id))?'var(--red)':'var(--border)'};">♥</button></div><div class="det-price">$${fmt(p.price)}</div>${p.oldPrice?`<div class="det-old">Antes: $${fmt(p.oldPrice)}</div>`:''}${freeShip?`<div class="free-ship-badge"><i class="fas fa-truck"></i> ¡ENVÍO GRATIS!</div>`:`<div style="color:var(--text2);font-size:.74rem;margin:6px 0;">🚚 Envío: $${SHIP_COST} (gratis +$${fmt(FREE_SHIP_MIN)})</div>`}<div class="advance-badge"><i class="fas fa-hand-holding-usd"></i> Anticipo 50% para confirmar</div><div class="no-return-badge"><i class="fas fa-exclamation-triangle"></i> No se aceptan devoluciones</div>${variantsHtml}<div class="det-desc">${p.desc||''}</div>${p.stock<=5?`<div style="background:var(--orange-pale);color:var(--orange);padding:8px;border-radius:var(--r4);margin:8px 0;font-weight:600;font-size:.78rem;">⚠️ ¡Solo quedan ${p.stock}!</div>`:''}<div class="qty-row"><span style="font-weight:600;">Cantidad:</span><div class="qty-ctrl"><div class="qbtn" onclick="chgQty(-1)">−</div><div class="qnum" id="detQtyEl">1</div><div class="qbtn" onclick="chgQty(1)">+</div></div></div><div class="det-btns"><button class="btn-cart" onclick="addCartFromDetail()"><i class="fas fa-cart-plus"></i> Agregar</button><button class="btn-wa" onclick="directWA('${p.id}')"><i class="fab fa-whatsapp"></i> Pedir YA</button></div></div>`;
+  document.getElementById('prodDetailContent').innerHTML=`<div class="det-gallery"><div class="det-gallery-track" id="galleryTrack">${slides}</div>${nav}${dots?`<div class="gallery-dots">${dots}</div>`:''}${p.oldPrice?`<div class="disc" style="position:absolute;top:10px;left:10px;z-index:6;">-${pct(p.price,p.oldPrice)}%</div>`:''}</div><div class="det-body"><div style="display:flex;justify-content:space-between;"><div class="det-name">${p.name}</div><button onclick="toggleFavDirect('${p.id}')" style="font-size:1.4rem;color:${favs.includes(String(p.id))?'var(--red)':'var(--border)'};">♥</button></div><div class="det-price">$${fmt(p.price)}</div>${p.oldPrice?`<div class="det-old">Antes: $${fmt(p.oldPrice)}</div>`:''}${freeShip?`<div class="free-ship-badge"><i class="fas fa-truck"></i> ¡ENVÍO GRATIS!</div>`:`<div style="color:var(--text2);font-size:.74rem;margin:6px 0;">🚚 Envío: $${SHIP_COST} (gratis +$${fmt(FREE_SHIP_MIN)})</div>`}<div class="advance-badge"><i class="fas fa-hand-holding-usd"></i> Anticipo 50% para confirmar</div><div class="no-return-badge"><i class="fas fa-exclamation-triangle"></i> No se aceptan devoluciones</div>${variantsHtml}<div class="det-desc">${p.desc||''}</div>${p.stock<=5?`<div style="background:var(--orange-pale);color:var(--orange);padding:8px;border-radius:var(--r4);margin:8px 0;font-weight:600;font-size:.78rem;">⚠️ ¡Solo quedan ${p.stock}!</div>`:''}<div style="color:var(--green-dark);font-size:.78rem;font-weight:600;margin:4px 0;">⏱️ Entrega estimada: ~${p.days||7} días</div><div class="qty-row"><span style="font-weight:600;">Cantidad:</span><div class="qty-ctrl"><div class="qbtn" onclick="chgQty(-1)">−</div><div class="qnum" id="detQtyEl">1</div><div class="qbtn" onclick="chgQty(1)">+</div></div></div><div class="det-btns"><button class="btn-cart" onclick="addCartFromDetail()"><i class="fas fa-cart-plus"></i> Agregar</button><button class="btn-wa" onclick="directWA('${p.id}')"><i class="fab fa-whatsapp"></i> Pedir YA</button></div></div>`;
   openDrawer('drawerProd');
 }
 function selectVariant(key,value,el){if(!curProd)return;el.parentElement.querySelectorAll('.variant-opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');selectedVariants[key]=value}
@@ -597,7 +660,6 @@ function checkPass(){if(document.getElementById('adminPassInput').value===ADMIN_
 function toggleEye(){const i=document.getElementById('adminPassInput'),ic=document.getElementById('eyeIcon');i.type=i.type==='password'?'text':'password';ic.className=i.type==='text'?'fas fa-eye-slash':'fas fa-eye'}
 function logoutAdmin(){isAdmin=false;sessionStorage.removeItem('ms_admin');updateAdminUI();showPage('perfil')}
 
-// IMÁGENES
 async function previewMultipleImgs(inp){
   if(!inp.files||!inp.files.length)return;
   for(const file of Array.from(inp.files)){
@@ -638,19 +700,18 @@ function renderEditImages(){
 }
 function removeEditImg(i){editImages.splice(i,1);renderEditImages();}
 
-// AGREGAR PRODUCTO
 async function addProduct(){
-  const n=document.getElementById('nName').value.trim(),p=parseFloat(document.getElementById('nPrice').value),op=parseFloat(document.getElementById('nOldPrice').value)||null,c=document.getElementById('nCat').value,d=document.getElementById('nDesc').value.trim(),s=parseInt(document.getElementById('nStock').value)||10,e=document.getElementById('nEmoji').value||'📦',io=document.getElementById('chkOffer').checked,ix=document.getElementById('chkNew').checked,ib=document.getElementById('chkBest').checked;
+  const n=document.getElementById('nName').value.trim(),p=parseFloat(document.getElementById('nPrice').value),op=parseFloat(document.getElementById('nOldPrice').value)||null,c=document.getElementById('nCat').value,d=document.getElementById('nDesc').value.trim(),s=parseInt(document.getElementById('nStock').value)||10,dy=parseInt(document.getElementById('nDays').value)||7,e=document.getElementById('nEmoji').value||'📦',io=document.getElementById('chkOffer').checked,ix=document.getElementById('chkNew').checked,ib=document.getElementById('chkBest').checked;
   const selSizes=Array.from(document.querySelectorAll('#sizeTags .tag-chip.sel')).map(el=>el.dataset.size);
   const selColors=Array.from(document.querySelectorAll('#colorSwatches .color-swatch.sel')).map(el=>el.dataset.color);
   let variants={};if(selSizes.length>0)variants.Talla=selSizes;if(selColors.length>0)variants.Color=selColors;if(Object.keys(variants).length===0)variants=null;
   if(!n||!p||!c){toast('❌ Completa los campos');return}
   const finalImages = await Promise.all(tempNewImages.map(img => compressImage(img)));
-  const newProduct={name:n,price:p,oldPrice:op,cat:c,emoji:e,stock:s,desc:d,variants,isOffer:io,isNew:ix,isBest:ib,days:7,images:finalImages};
+  const newProduct={name:n,price:p,oldPrice:op,cat:c,emoji:e,stock:s,desc:d,variants,isOffer:io,isNew:ix,isBest:ib,days:dy,images:finalImages};
   db.collection("products").add(newProduct).then(() => { toast('✅ Producto agregado'); loadProductsFromFirebase(); }).catch(() => toast('Error de conexión'));
   closeDrawers();
   ['nName','nPrice','nOldPrice','nDesc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
-  document.getElementById('nStock').value='10';document.getElementById('nEmoji').value='';
+  document.getElementById('nStock').value='10';document.getElementById('nDays').value='7';document.getElementById('nEmoji').value='';
   document.querySelectorAll('#sizeTags .tag-chip,#colorSwatches .color-swatch').forEach(el=>el.classList.remove('sel'));
   tempNewImages=[];document.getElementById('imgGrid').innerHTML='';document.getElementById('chkOffer').checked=false;document.getElementById('chkNew').checked=true;document.getElementById('chkBest').checked=false;
 }
@@ -668,6 +729,7 @@ function editProduct(id){
   document.getElementById('eOldPrice').value=pr.oldPrice||'';
   document.getElementById('eDesc').value=pr.desc||'';
   document.getElementById('eStock').value=pr.stock||10;
+  document.getElementById('eDays').value=pr.days||7;
   document.getElementById('eEmoji').value=pr.emoji||'📦';
   document.getElementById('eChkOffer').checked=pr.isOffer||false;
   document.getElementById('eChkNew').checked=pr.isNew!==false;
@@ -690,22 +752,22 @@ async function saveEdit(){
     cat:document.getElementById('eCat').value,
     desc:document.getElementById('eDesc').value.trim(),
     stock:parseInt(document.getElementById('eStock').value)||10,
+    days:parseInt(document.getElementById('eDays').value)||7,
     emoji:document.getElementById('eEmoji').value||'📦',
     images:finalImages,
     isOffer:document.getElementById('eChkOffer').checked,
     isNew:document.getElementById('eChkNew').checked,
-    isBest:document.getElementById('eChkBest').checked,
-    days:7
+    isBest:document.getElementById('eChkBest').checked
   };
   const original=products.find(p=>String(p.id)===id);
   if(original&&original.variants) updatedData.variants=original.variants;
   db.collection("products").doc(id).update(updatedData)
     .then(()=>{toast('✅ Producto actualizado');loadProductsFromFirebase();closeDrawers();})
-    .catch((e)=>{console.error(e);toast('❌ Error al actualizar. ¿Imágenes muy pesadas?');});
+    .catch((e)=>{console.error(e);toast('❌ Error al actualizar');});
 }
 
 function refreshAll(){buildOffers();buildBest();buildNew();buildCatGrid();renderAdminList();document.getElementById('adminProdCount').textContent=products.length}
-function renderAdminList(){const e=document.getElementById('adminProdList');if(!e)return;e.innerHTML=products.map(p=>`<div class="aprod-item"><div class="aprod-img">${getImg(p)}</div><div class="aprod-info"><div class="aprod-name">${p.name}</div><div class="aprod-sub">${p.cat} · Stock: ${p.stock} · 🖼️ ${(p.images||[]).length}</div><div class="aprod-price">$${fmt(p.price)}</div></div><button class="btn-edit" onclick="editProduct('${p.id}')">Editar</button><button class="btn-del" onclick="deleteProduct('${p.id}')">Del</button></div>`).join('')}
+function renderAdminList(){const e=document.getElementById('adminProdList');if(!e)return;e.innerHTML=products.map(p=>`<div class="aprod-item"><div class="aprod-img">${getImg(p)}</div><div class="aprod-info"><div class="aprod-name">${p.name}</div><div class="aprod-sub">${p.cat} · Stock: ${p.stock} · 🖼️ ${(p.images||[]).length} · ⏱️${p.days||7}d</div><div class="aprod-price">$${fmt(p.price)}</div></div><button class="btn-edit" onclick="editProduct('${p.id}')">Editar</button><button class="btn-del" onclick="deleteProduct('${p.id}')">Del</button></div>`).join('')}
 function showAdminSub(id){if(!isAdmin)return;const e=document.getElementById('adminProdList');if(!e)return;if(!orders.length){e.innerHTML='<div class="empty"><p>Sin pedidos</p></div>';return}e.innerHTML=orders.map(o=>`<div style="background:var(--surface);border-radius:var(--r8);border:1px solid var(--border);padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;"><span style="font-weight:700;">#${String(o.id).slice(-6)} - ${o.name}</span><span style="color:var(--orange);font-size:.75rem;">${o.status}</span></div><div style="font-size:.75rem;color:var(--text2);">${o.community} · ${o.date}</div><div style="font-weight:800;color:var(--blue);">Total: $${fmt(o.total)}</div></div>`).join('');document.getElementById('adminOrderCount').textContent=orders.length}
 function renderOrderHistory(){const e=document.getElementById('orderHistory');if(!e)return;if(!orders.length){e.innerHTML='<div class="empty"><i class="fas fa-box"></i><p>Sin pedidos</p></div>';return}e.innerHTML=orders.map(o=>`<div style="background:var(--surface);border-radius:var(--r8);border:1px solid var(--border);padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;"><span style="font-weight:700;">Pedido #${String(o.id).slice(-6)}</span><span style="color:var(--orange);font-size:.75rem;">${o.status}</span></div><div style="font-size:.75rem;color:var(--text2);">${o.date}</div><div style="font-weight:800;color:var(--blue);">Total: $${fmt(o.total)}</div></div>`).join('')}
 function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const el=document.getElementById('page-'+id);if(el)el.classList.add('active');const nm={home:'navHome',categorias:'navCat',perfil:'navPerfil'};document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));if(nm[id])document.getElementById(nm[id])?.classList.add('active');window.scrollTo(0,0);if(id==='admin'){if(!isAdmin){openAdminLogin();return}renderAdminList();document.getElementById('adminProdCount').textContent=products.length;document.getElementById('adminOrderCount').textContent=orders.length}if(id==='pedidos-hist')renderOrderHistory()}

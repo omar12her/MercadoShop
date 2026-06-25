@@ -6,6 +6,8 @@
 <meta name="description" content="MercadoShop - Entregamos hasta tu comunidad">
 <meta name="theme-color" content="#1565C0">
 <title>MercadoShop - Tu tienda de confianza</title>
+<!-- FAVICON -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231565C0'/><text y='.75em' font-size='65' text-anchor='middle' x='50'>🛒</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -357,9 +359,45 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
     <label class="flabel">Precio anterior</label><input type="number" class="finput" id="nOldPrice">
     <label class="flabel">Categoría *</label><select class="fselect" id="nCat"><option value="">Seleccionar...</option></select>
     <label class="flabel">Descripción</label><textarea class="finput" id="nDesc" rows="2"></textarea>
-    <label class="flabel">Tallas (selecciona)</label>
+    <label class="flabel">Tallas (selecciona las que aplican)</label>
     <div class="tag-container" id="sizeTags">
-      <div class="tag-chip" data-size="Chica" onclick="toggleTag(this)">Chica</div><div class="tag-chip" data-size="Mediana" onclick="toggleTag(this)">Mediana</div><div class="tag-chip" data-size="Grande" onclick="toggleTag(this)">Grande</div><div class="tag-chip" data-size="XG" onclick="toggleTag(this)">XG</div><div class="tag-chip" data-size="22" onclick="toggleTag(this)">22</div><div class="tag-chip" data-size="23" onclick="toggleTag(this)">23</div><div class="tag-chip" data-size="24" onclick="toggleTag(this)">24</div><div class="tag-chip" data-size="25" onclick="toggleTag(this)">25</div><div class="tag-chip" data-size="26" onclick="toggleTag(this)">26</div><div class="tag-chip" data-size="27" onclick="toggleTag(this)">27</div><div class="tag-chip" data-size="28" onclick="toggleTag(this)">28</div>
+      <!-- ROPA -->
+      <div class="tag-chip" data-size="Chica" onclick="toggleTag(this)">Chica</div>
+      <div class="tag-chip" data-size="Mediana" onclick="toggleTag(this)">Mediana</div>
+      <div class="tag-chip" data-size="Grande" onclick="toggleTag(this)">Grande</div>
+      <div class="tag-chip" data-size="XG" onclick="toggleTag(this)">XG</div>
+      <!-- ROPA NUMÉRICA -->
+      <div class="tag-chip" data-size="28" onclick="toggleTag(this)">28</div>
+      <div class="tag-chip" data-size="30" onclick="toggleTag(this)">30</div>
+      <div class="tag-chip" data-size="32" onclick="toggleTag(this)">32</div>
+      <div class="tag-chip" data-size="34" onclick="toggleTag(this)">34</div>
+      <div class="tag-chip" data-size="36" onclick="toggleTag(this)">36</div>
+      <div class="tag-chip" data-size="38" onclick="toggleTag(this)">38</div>
+      <div class="tag-chip" data-size="40" onclick="toggleTag(this)">40</div>
+      <div class="tag-chip" data-size="42" onclick="toggleTag(this)">42</div>
+      <div class="tag-chip" data-size="44" onclick="toggleTag(this)">44</div>
+      <!-- CALZADO -->
+      <div class="tag-chip" data-size="20" onclick="toggleTag(this)">20</div>
+      <div class="tag-chip" data-size="20.5" onclick="toggleTag(this)">20.5</div>
+      <div class="tag-chip" data-size="21" onclick="toggleTag(this)">21</div>
+      <div class="tag-chip" data-size="21.5" onclick="toggleTag(this)">21.5</div>
+      <div class="tag-chip" data-size="22" onclick="toggleTag(this)">22</div>
+      <div class="tag-chip" data-size="22.5" onclick="toggleTag(this)">22.5</div>
+      <div class="tag-chip" data-size="23" onclick="toggleTag(this)">23</div>
+      <div class="tag-chip" data-size="23.5" onclick="toggleTag(this)">23.5</div>
+      <div class="tag-chip" data-size="24" onclick="toggleTag(this)">24</div>
+      <div class="tag-chip" data-size="24.5" onclick="toggleTag(this)">24.5</div>
+      <div class="tag-chip" data-size="25" onclick="toggleTag(this)">25</div>
+      <div class="tag-chip" data-size="25.5" onclick="toggleTag(this)">25.5</div>
+      <div class="tag-chip" data-size="26" onclick="toggleTag(this)">26</div>
+      <div class="tag-chip" data-size="26.5" onclick="toggleTag(this)">26.5</div>
+      <div class="tag-chip" data-size="27" onclick="toggleTag(this)">27</div>
+      <div class="tag-chip" data-size="27.5" onclick="toggleTag(this)">27.5</div>
+      <div class="tag-chip" data-size="28" onclick="toggleTag(this)">28</div>
+      <div class="tag-chip" data-size="28.5" onclick="toggleTag(this)">28.5</div>
+      <div class="tag-chip" data-size="29" onclick="toggleTag(this)">29</div>
+      <div class="tag-chip" data-size="29.5" onclick="toggleTag(this)">29.5</div>
+      <div class="tag-chip" data-size="30" onclick="toggleTag(this)">30</div>
     </div>
     <label class="flabel">Colores (selecciona)</label>
     <div class="color-swatches" id="colorSwatches">
@@ -519,14 +557,12 @@ const lbImg = document.getElementById('lbImg');
 
 lbZoomContainer.addEventListener('touchstart', function(e){
   if(e.touches.length === 1){
-    // Posible pan o swipe para cambiar imagen
     lbIsPanning = true; lbIsPinching = false;
     lbPanStartX = e.touches[0].clientX;
     lbPanStartY = e.touches[0].clientY;
     lbPanTranslateX = lbTranslateX;
     lbPanTranslateY = lbTranslateY;
   } else if(e.touches.length === 2){
-    // Pinch zoom
     lbIsPinching = true; lbIsPanning = false;
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -542,25 +578,19 @@ lbZoomContainer.addEventListener('touchmove', function(e){
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     const dist = Math.sqrt(dx*dx + dy*dy);
     lbScale = Math.min(4, Math.max(1, lbLastScale * (dist / lbInitialPinchDist)));
-    // Si volvió a 1, resetear posición
     if(lbScale <= 1.01){ lbScale = 1; lbTranslateX = 0; lbTranslateY = 0; }
     lbImg.style.transform = `scale(${lbScale}) translate(${lbTranslateX}px, ${lbTranslateY}px)`;
   } else if(lbIsPanning && e.touches.length === 1 && lbScale > 1){
-    // Mover imagen cuando hay zoom
     const deltaX = e.touches[0].clientX - lbPanStartX;
     const deltaY = e.touches[0].clientY - lbPanStartY;
     lbTranslateX = lbPanTranslateX + deltaX;
     lbTranslateY = lbPanTranslateY + deltaY;
     lbImg.style.transform = `scale(${lbScale}) translate(${lbTranslateX}px, ${lbTranslateY}px)`;
-  } else if(lbIsPanning && e.touches.length === 1 && lbScale === 1){
-    // Swipe horizontal para cambiar imagen (solo si no hay zoom)
-    // Se manejará en touchend
   }
 }, {passive: false});
 
 lbZoomContainer.addEventListener('touchend', function(e){
   if(lbIsPanning && lbScale === 1 && e.changedTouches.length === 1){
-    // Detectar swipe para cambiar de imagen
     const deltaX = e.changedTouches[0].clientX - lbPanStartX;
     const deltaY = e.changedTouches[0].clientY - lbPanStartY;
     if(Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY)){
@@ -569,11 +599,6 @@ lbZoomContainer.addEventListener('touchend', function(e){
     }
   }
   lbIsPanning = false; lbIsPinching = false;
-});
-
-// Doble tap para resetear zoom
-lbZoomContainer.addEventListener('click', function(e){
-  // No cerrar si se hizo pan o zoom
 });
 
 document.getElementById('lightbox').addEventListener('click', function(e){
@@ -696,7 +721,6 @@ function openProd(id){
     variantsHtml+='</div>';
   }
   document.getElementById('prodDetailContent').innerHTML=`<div class="det-gallery" id="detGallery"><div class="det-gallery-track" id="galleryTrack">${slides}</div>${nav}${dots?`<div class="gallery-dots" id="galleryDots">${dots}</div>`:''}${p.oldPrice?`<div class="disc" style="position:absolute;top:10px;left:10px;z-index:6;">-${pct(p.price,p.oldPrice)}%</div>`:''}</div><div class="det-body"><div style="display:flex;justify-content:space-between;"><div class="det-name">${p.name}</div><button onclick="toggleFavDirect('${p.id}')" style="font-size:1.4rem;color:${favs.includes(String(p.id))?'var(--red)':'var(--border)'};">♥</button></div><div class="det-price">$${fmt(p.price)}</div>${p.oldPrice?`<div class="det-old">Antes: $${fmt(p.oldPrice)}</div>`:''}${freeShip?`<div class="free-ship-badge"><i class="fas fa-truck"></i> ¡ENVÍO GRATIS!</div>`:`<div style="color:var(--text2);font-size:.74rem;margin:6px 0;">🚚 Envío: $${SHIP_COST} (gratis +$${fmt(FREE_SHIP_MIN)})</div>`}<div class="advance-badge"><i class="fas fa-hand-holding-usd"></i> Anticipo 50% para confirmar</div><div class="no-return-badge"><i class="fas fa-exclamation-triangle"></i> No se aceptan devoluciones</div>${variantsHtml}<div class="det-desc">${p.desc||''}</div>${p.stock<=5?`<div style="background:var(--orange-pale);color:var(--orange);padding:8px;border-radius:var(--r4);margin:8px 0;font-weight:600;font-size:.78rem;">⚠️ ¡Solo quedan ${p.stock}!</div>`:''}<div style="color:var(--green-dark);font-size:.78rem;font-weight:600;margin:4px 0;">⏱️ Entrega estimada: ~${p.days||7} días</div><div class="qty-row"><span style="font-weight:600;">Cantidad:</span><div class="qty-ctrl"><div class="qbtn" onclick="chgQty(-1)">−</div><div class="qnum" id="detQtyEl">1</div><div class="qbtn" onclick="chgQty(1)">+</div></div></div><div class="det-btns"><button class="btn-cart" onclick="addCartFromDetail()"><i class="fas fa-cart-plus"></i> Agregar</button><button class="btn-wa" onclick="directWA('${p.id}')"><i class="fab fa-whatsapp"></i> Pedir YA</button></div></div>`;
-  // Agregar eventos swipe a la galería
   setTimeout(() => attachGallerySwipe(), 100);
   openDrawer('drawerProd');
 }

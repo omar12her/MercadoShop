@@ -12,7 +12,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <style>
-:root{--blue:#1565C0;--blue-dark:#0D47A1;--blue-light:#1976D2;--blue-pale:#E3F2FD;--green:#25D366;--green-dark:#128C7E;--green-pale:#E8F5E9;--orange:#FF6F00;--orange-pale:#FFF3E0;--red:#D32F2F;--red-pale:#FFEBEE;--yellow:#FFB300;--purple:#7c3aed;--bg:#F5F5F5;--surface:#FFFFFF;--text:#1A1A1A;--text2:#555555;--muted:#999999;--border:#E0E0E0;--r4:6px;--r8:10px;--r12:14px;--r16:18px;--r50:50px;--shadow-sm:0 1px 3px rgba(0,0,0,0.05);--shadow:0 2px 10px rgba(0,0,0,0.07);--shadow-lg:0 6px 20px rgba(0,0,0,0.12);--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
+:root{--blue:#1565C0;--blue-dark:#0D47A1;--blue-light:#1976D2;--blue-pale:#E3F2FD;--green:#25D366;--green-dark:#128C7E;--green-pale:#E8F5E9;--orange:#FF6F00;--orange-pale:#FFF3E0;--red:#D32F2F;--red-pale:#FFEBEE;--yellow:#FFB300;--purple:#7c3aed;--purple-dark:#5b21b6;--bg:#F5F5F5;--surface:#FFFFFF;--text:#1A1A1A;--text2:#555555;--muted:#999999;--border:#E0E0E0;--r4:6px;--r8:10px;--r12:14px;--r16:18px;--r50:50px;--shadow-sm:0 1px 3px rgba(0,0,0,0.05);--shadow:0 2px 10px rgba(0,0,0,0.07);--shadow-lg:0 6px 20px rgba(0,0,0,0.12);--transition:0.25s cubic-bezier(0.4,0,0.2,1)}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{overflow-x:hidden;-webkit-text-size-adjust:100%;touch-action:pan-y;scroll-behavior:smooth}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;width:100%;max-width:100vw;line-height:1.5;padding-top:128px;padding-bottom:75px}
@@ -157,11 +157,13 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 .qty-ctrl{display:flex;align-items:center;border:2px solid var(--blue);border-radius:var(--r8);overflow:hidden}
 .qbtn{width:36px;height:36px;background:var(--blue);color:#fff;font-size:1.1rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .qnum{width:44px;text-align:center;font-size:.9rem;font-weight:700}
-.det-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.det-btns{display:flex;gap:8px;margin-top:12px;}
 .btn-cart{flex:1;min-width:100px;background:var(--orange);color:#fff;font-size:.85rem;font-weight:700;padding:13px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:6px}
 .btn-wa{flex:1;min-width:100px;background:var(--green);color:#fff;font-size:.85rem;font-weight:700;padding:13px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:6px}
-.btn-share{flex:0;min-width:44px;background:var(--purple);color:#fff;font-size:1rem;font-weight:700;padding:13px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all var(--transition);}
-.btn-share:hover{background:#6d28d9;box-shadow:0 0 15px rgba(124,58,237,0.4);}
+/* Botón compartir destacado */
+.btn-share-top{width:100%;background:var(--purple);color:#fff;font-size:.9rem;font-weight:700;padding:14px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 4px;cursor:pointer;transition:all var(--transition);}
+.btn-share-top:hover{background:var(--purple-dark);box-shadow:0 4px 15px rgba(124,58,237,0.4);}
+.btn-share-top:active{transform:scale(0.97);}
 .no-return-badge{display:inline-flex;align-items:center;gap:5px;background:var(--red-pale);color:var(--red);font-size:.68rem;font-weight:600;padding:5px 8px;border-radius:var(--r4);margin:6px 0}
 .advance-badge{display:inline-flex;align-items:center;gap:5px;background:var(--orange-pale);color:var(--orange);font-size:.68rem;font-weight:600;padding:5px 8px;border-radius:var(--r4);margin:4px 0}
 .cart-item{display:flex;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border)}
@@ -468,7 +470,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 const WHATSAPP='522724446924',ADMIN_PASS='omar123',FREE_SHIP_MIN=350,SHIP_COST=100;
-const DOMINIO='www.mercado-shop.com'; // Tu dominio real
+const DOMINIO='www.mercado-shop.com';
 const CATS=[{id:'Ropa',icon:'👕'},{id:'Calzado',icon:'👟'},{id:'Electrónica',icon:'📱'},{id:'Celulares',icon:'📲'},{id:'Hogar',icon:'🏠'},{id:'Cocina',icon:'🍳'},{id:'Herramientas',icon:'🔧'},{id:'Belleza',icon:'💄'},{id:'Juguetes',icon:'🧸'},{id:'Escuela',icon:'📚'},{id:'Mascotas',icon:'🐕'},{id:'Deportes',icon:'⚽'}];
 const ROUTES=[{day:'14',month:'JUN',community:'San Juan Mixtepec'},{day:'15',month:'JUN',community:'Santa María'},{day:'17',month:'JUN',community:'Santiago Llano'},{day:'19',month:'JUN',community:'San Pedro Jicayán'},{day:'21',month:'JUN',community:'Sta. Catarina'}];
 
@@ -504,7 +506,20 @@ function loadProductsFromFirebase(){
     products=[]; snap.forEach(doc => products.push({id:doc.id,...doc.data()}));
     if(!products.length) loadDefaultProducts();
     refreshAll();
-  }).catch(() => { loadDefaultProducts(); refreshAll(); });
+    // 🆕 ABRIR PRODUCTO DESDE URL COMPARTIDA
+    checkSharedProduct();
+  }).catch(() => { loadDefaultProducts(); refreshAll(); checkSharedProduct(); });
+}
+
+function checkSharedProduct(){
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get('producto');
+  if(productId && products.length > 0){
+    setTimeout(() => {
+      const p = products.find(x => String(x.id) === productId);
+      if(p) openProd(productId);
+    }, 500);
+  }
 }
 
 function loadDefaultProducts(){
@@ -601,7 +616,6 @@ document.getElementById('lightbox').addEventListener('click', function(e){
 function toggleTag(el){el.classList.toggle('sel')}
 function toggleColor(el){el.classList.toggle('sel')}
 
-// 🆕 FUNCIÓN PARA COMPARTIR PRODUCTO
 function shareProduct(id){
   const p = products.find(x => String(x.id) === String(id));
   if(!p) return;
@@ -610,18 +624,15 @@ function shareProduct(id){
   const vars = p.variants ? Object.entries(p.variants).map(([k,v]) => `\n   ${k}: ${v.join(', ')}`).join('') : '';
   const msg = `🛍️ *Te recomiendo este producto de MercadoShop*\n\n📦 *${p.name}*\n💰 *$${fmt(p.price)} MXN*${vars}\n📝 ${p.desc||''}\n\n🔗 Míralo aquí:\n${url}\n\n✅ *Entrega en tu comunidad*`;
   
-  // Intentar usar Web Share API (nativo del celular)
   if(navigator.share){
     navigator.share({
       title: p.name,
       text: `Te recomiendo: ${p.name} - $${fmt(p.price)} MXN en MercadoShop`,
       url: url
     }).catch(() => {
-      // Si falla, abrir WhatsApp
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     });
   } else {
-    // Abrir WhatsApp directamente
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   }
 }
@@ -740,6 +751,7 @@ function openProd(id){
   }
   document.getElementById('prodDetailContent').innerHTML=`
     <div class="det-gallery" id="detGallery"><div class="det-gallery-track" id="galleryTrack">${slides}</div>${nav}${dots?`<div class="gallery-dots" id="galleryDots">${dots}</div>`:''}${p.oldPrice?`<div class="disc" style="position:absolute;top:10px;left:10px;z-index:6;">-${pct(p.price,p.oldPrice)}%</div>`:''}</div>
+    <button class="btn-share-top" onclick="shareProduct('${p.id}')"><i class="fas fa-share-alt"></i> Compartir este producto</button>
     <div class="det-body">
       <div style="display:flex;justify-content:space-between;"><div class="det-name">${p.name}</div><button onclick="toggleFavDirect('${p.id}')" style="font-size:1.4rem;color:${favs.includes(String(p.id))?'var(--red)':'var(--border)'};">♥</button></div>
       <div class="det-price">$${fmt(p.price)}</div>${p.oldPrice?`<div class="det-old">Antes: $${fmt(p.oldPrice)}</div>`:''}
@@ -754,7 +766,6 @@ function openProd(id){
       <div class="det-btns">
         <button class="btn-cart" onclick="addCartFromDetail()"><i class="fas fa-cart-plus"></i> Agregar</button>
         <button class="btn-wa" onclick="directWA('${p.id}')"><i class="fab fa-whatsapp"></i> Pedir</button>
-        <button class="btn-share" onclick="shareProduct('${p.id}')" title="Compartir producto"><i class="fas fa-share-alt"></i></button>
       </div>
     </div>`;
   setTimeout(() => attachGallerySwipe(), 100);

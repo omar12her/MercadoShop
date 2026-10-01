@@ -165,7 +165,6 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 .det-btns{display:flex;gap:8px;margin-top:12px;}
 .btn-cart{flex:1;min-width:100px;background:var(--orange);color:#fff;font-size:.85rem;font-weight:700;padding:13px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:6px}
 .btn-wa{flex:1;min-width:100px;background:var(--green);color:#fff;font-size:.85rem;font-weight:700;padding:13px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:6px}
-/* Botón compartir destacado */
 .btn-share-top{width:100%;background:var(--purple);color:#fff;font-size:.9rem;font-weight:700;padding:14px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 4px;cursor:pointer;transition:all var(--transition);}
 .btn-share-top:hover{background:var(--purple-dark);box-shadow:0 4px 15px rgba(124,58,237,0.4);}
 .btn-share-top:active{transform:scale(0.97);}
@@ -241,6 +240,15 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .empty{text-align:center;padding:40px 20px;color:var(--text2)}
 .empty i{font-size:2.8rem;color:var(--border);margin-bottom:8px}
+.bulk-row{display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r8);padding:8px;margin-bottom:6px}
+.bulk-thumb{width:50px;height:50px;background:#f5f5f5;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;overflow:hidden}
+.bulk-thumb img{width:100%;height:100%;object-fit:contain}
+.bulk-info{flex:1;min-width:0}
+.bulk-name{font-size:.7rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bulk-meta{font-size:.62rem;color:var(--text2);margin-top:1px}
+.bulk-inputs{display:flex;gap:4px;margin-top:4px}
+.bulk-inputs input{padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:.7rem}
+.bulk-del{background:var(--red-pale);color:var(--red);border:none;border-radius:4px;padding:0 8px;font-size:.75rem;height:26px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -339,6 +347,7 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
   <div class="agrid">
     <div class="acard" onclick="openDrawer('drawerAddProd')"><i class="fas fa-plus-circle"></i><span>Agregar</span></div>
     <div class="acard" onclick="showAdminSub('pedidos')"><i class="fas fa-receipt"></i><span>Pedidos</span></div>
+    <div class="acard" onclick="openDrawer('drawerBulkImport')"><i class="fas fa-cloud-download-alt"></i><span>Importar</span></div>
     <div class="acard" onclick="openDrawer('drawerAnuncio')"><i class="fas fa-bullhorn"></i><span>Anuncio</span></div>
   </div>
   <div class="sh"><span class="sh-title">Productos</span></div><div style="padding:0 12px 20px;" id="adminProdList"></div>
@@ -451,6 +460,44 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
     <button class="btn-add" style="margin-top:8px;border-radius:var(--r8);padding:14px;width:100%;background:var(--red-pale);color:var(--red);font-size:.9rem;" onclick="eliminarAnuncio()"><i class="fas fa-trash"></i> Quitar Anuncio</button>
   </div>
 </div>
+
+<!-- 🆕 DRAWER DE IMPORTACIÓN MASIVA -->
+<div class="drawer" id="drawerBulkImport"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">📦 Importación Masiva</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div>
+  <div style="padding:0 16px 30px;">
+    <div style="background:var(--blue-pale);border-radius:var(--r8);padding:10px;margin-bottom:10px;font-size:.72rem;color:var(--blue-dark);line-height:1.4;">
+      💡 Pega los links de productos (uno por línea) de <strong>Mercado Libre, Amazon, AliExpress, Walmart, Shein</strong> o cualquier tienda. Se extraerá título, imagen, precio y descripción automáticamente.<br>
+      ⚠️ Recomendado: máx. 10 links a la vez para que no se sature.
+    </div>
+    <label class="flabel">Links de productos</label>
+    <textarea class="finput" id="bulkLinks" rows="5" placeholder="https://articulo.mercadolibre.com.mx/MLM-123456789&#10;https://www.amazon.com.mx/dp/B0XXXXXX&#10;https://es.aliexpress.com/item/100XXXX.html"></textarea>
+
+    <label class="flabel">Categoría por defecto</label>
+    <select class="fselect" id="bulkCat"></select>
+
+    <label class="flabel">Ajuste de precio (markup)</label>
+    <div style="display:flex;gap:8px;">
+      <input type="number" class="finput" id="bulkMarkup" value="30" style="flex:1;">
+      <select class="fselect" id="bulkMarkupType" style="flex:1;">
+        <option value="percent">% de ganancia</option>
+        <option value="fixed">+ Pesos fijos</option>
+      </select>
+    </div>
+
+    <label class="flabel">Días de entrega (para todos)</label>
+    <input type="number" class="finput" id="bulkDays" value="7" min="1" max="60">
+
+    <button class="btn-add" style="margin-top:14px;background:var(--blue);border-radius:var(--r8);padding:13px;font-size:.88rem;" onclick="analyzeBulkLinks()">
+      <i class="fas fa-search"></i> Analizar productos
+    </button>
+
+    <div id="bulkPreview" style="margin-top:14px;"></div>
+
+    <button class="btn-add" id="bulkImportBtn" style="margin-top:14px;background:var(--green);border-radius:var(--r8);padding:14px;font-size:.9rem;display:none;" onclick="confirmBulkImport()">
+      <i class="fas fa-cloud-upload-alt"></i> Importar todo
+    </button>
+  </div>
+</div>
+
 <div class="drawer" id="drawerAdminLogin"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">🔐 Admin</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div>
   <div style="padding:20px;text-align:center;">
     <div style="width:60px;height:60px;border-radius:50%;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.6rem;">🔒</div>
@@ -482,6 +529,7 @@ const ROUTES=[{day:'14',month:'JUN',community:'San Juan Mixtepec'},{day:'15',mon
 let products=[],cart=[],favs=[],orders=[],profile={};
 let isAdmin=false,curProd=null,detQty=1,selPay='transferencia',carIdx=0,carTimer,tempNewImages=[],editImages=[],galleryIdx=0,selectedVariants={},lbImages=[],lbIdx=0;
 let backPressTimer = 0;
+let bulkProducts=[];
 
 let lbScale = 1, lbTranslateX = 0, lbTranslateY = 0, lbInitialPinchDist = 0, lbLastScale = 1;
 let lbPanStartX = 0, lbPanStartY = 0, lbPanTranslateX = 0, lbPanTranslateY = 0;
@@ -511,7 +559,6 @@ function loadProductsFromFirebase(){
     products=[]; snap.forEach(doc => products.push({id:doc.id,...doc.data()}));
     if(!products.length) loadDefaultProducts();
     refreshAll();
-    // 🆕 ABRIR PRODUCTO DESDE URL COMPARTIDA
     checkSharedProduct();
   }).catch(() => { loadDefaultProducts(); refreshAll(); checkSharedProduct(); });
 }
@@ -624,19 +671,12 @@ function toggleColor(el){el.classList.toggle('sel')}
 function shareProduct(id){
   const p = products.find(x => String(x.id) === String(id));
   if(!p) return;
-  
   const url = `https://${DOMINIO}/?producto=${id}`;
   const vars = p.variants ? Object.entries(p.variants).map(([k,v]) => `\n   ${k}: ${v.join(', ')}`).join('') : '';
   const msg = `🛍️ *Te recomiendo este producto de MercadoShop*\n\n📦 *${p.name}*\n💰 *$${fmt(p.price)} MXN*${vars}\n📝 ${p.desc||''}\n\n🔗 Míralo aquí:\n${url}\n\n✅ *Entrega en tu comunidad*`;
-  
   if(navigator.share){
-    navigator.share({
-      title: p.name,
-      text: `Te recomiendo: ${p.name} - $${fmt(p.price)} MXN en MercadoShop`,
-      url: url
-    }).catch(() => {
-      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-    });
+    navigator.share({ title: p.name, text: `Te recomiendo: ${p.name} - $${fmt(p.price)} MXN en MercadoShop`, url: url })
+      .catch(() => { window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank'); });
   } else {
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
   }
@@ -647,26 +687,19 @@ window.addEventListener('load',()=>{
   orders=JSON.parse(localStorage.getItem('ms_orders')||'[]'); profile=JSON.parse(localStorage.getItem('ms_profile')||'{}');
   loadProductsFromFirebase(); buildCatNav(); buildCatGrid(); updateBadge(); loadProfile(); initCarousel(); buildRoutesMini(); updateFreeShipBar();
   loadAnuncio();
-  CATS.forEach(c=>{['nCat','eCat'].forEach(id=>{const sel=document.getElementById(id);if(sel){const o=document.createElement('option');o.value=c.id;o.textContent=c.icon+' '+c.id;sel.appendChild(o)}})});
+  CATS.forEach(c=>{['nCat','eCat','bulkCat'].forEach(id=>{const sel=document.getElementById(id);if(sel){const o=document.createElement('option');o.value=c.id;o.textContent=c.icon+' '+c.id;sel.appendChild(o)}})});
   isAdmin=sessionStorage.getItem('ms_admin')==='1'; updateAdminUI();
   document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
-  
   window.addEventListener('popstate', function(e) {
     if (document.querySelector('.drawer.show')) {
       closeDrawers();
       history.pushState({ drawerOpen: false }, '', window.location.href);
     } else if (document.getElementById('page-home').classList.contains('active')) {
       const now = Date.now();
-      if (now - backPressTimer < 2000) {
-        history.back();
-      } else {
-        backPressTimer = now;
-        toast('↩ Presiona de nuevo para salir');
-        history.pushState({ home: true }, '', window.location.href);
-      }
+      if (now - backPressTimer < 2000) { history.back(); }
+      else { backPressTimer = now; toast('↩ Presiona de nuevo para salir'); history.pushState({ home: true }, '', window.location.href); }
     } else {
-      goHome();
-      history.pushState({ page: 'home' }, '', window.location.href);
+      goHome(); history.pushState({ page: 'home' }, '', window.location.href);
     }
   });
   history.replaceState({ home: true }, '', window.location.href);
@@ -681,9 +714,7 @@ function loadAnuncio(){
       const a = doc.data();
       texto.textContent = `Próxima entrega: ${a.comunidad||'N/A'} el ${a.dia||'?'} de ${a.mes||'???'} a las ${a.hora||'??'}`;
       banner.style.display = 'flex';
-    } else {
-      banner.style.display = 'none';
-    }
+    } else { banner.style.display = 'none'; }
   }).catch(() => {});
 }
 
@@ -780,11 +811,7 @@ function openProd(id){
 function attachGallerySwipe(){
   const gallery = document.getElementById('detGallery');
   if(!gallery) return;
-  gallery.addEventListener('touchstart', function(e){
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    touchMoved = false;
-  }, {passive: true});
+  gallery.addEventListener('touchstart', function(e){ touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; touchMoved = false; }, {passive: true});
   gallery.addEventListener('touchmove', function(e){ touchMoved = true; }, {passive: true});
   gallery.addEventListener('touchend', function(e){
     if(!touchMoved) return;
@@ -959,6 +986,237 @@ function goHome(){document.getElementById('searchInput').value='';showPage('home
 function openDrawer(id){document.getElementById('overlay').classList.add('show');document.getElementById(id).classList.add('show');document.body.style.overflow='hidden';history.pushState({drawerOpen:true},'',window.location.href)}
 function closeDrawers(){document.querySelectorAll('.drawer').forEach(d=>d.classList.remove('show'));document.getElementById('overlay').classList.remove('show');document.body.style.overflow='';detQty=1;selectedVariants={}}
 let _ty=0;document.addEventListener('touchstart',e=>{if(e.target.closest('.drawer'))_ty=e.touches[0].clientY});document.addEventListener('touchend',e=>{if(e.target.closest('.drawer')&&e.changedTouches[0].clientY-_ty>80)closeDrawers()});
+
+/* ============================================================
+   🆕 IMPORTACIÓN MASIVA
+   ============================================================ */
+
+async function fetchWithProxy(url){
+  const proxies = [
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+    'https://corsproxy.io/?url=' + encodeURIComponent(url),
+    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url)
+  ];
+  let lastErr;
+  for(const proxyUrl of proxies){
+    try{
+      const res = await fetch(proxyUrl, { method: 'GET' });
+      if(res.ok){
+        const txt = await res.text();
+        if(txt && txt.length > 500) return txt;
+      }
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('No se pudo cargar');
+}
+
+function parseProduct(html, url){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  let title = doc.querySelector('meta[property="og:title"]')?.content
+           || doc.querySelector('meta[name="twitter:title"]')?.content
+           || doc.querySelector('title')?.textContent
+           || 'Sin título';
+  title = title.replace(/\s+/g,' ').trim().substring(0, 90);
+
+  let image = doc.querySelector('meta[property="og:image"]')?.content
+           || doc.querySelector('meta[name="twitter:image"]')?.content
+           || doc.querySelector('meta[property="og:image:secure_url"]')?.content
+           || '';
+  if(image && image.startsWith('//')) image = 'https:' + image;
+
+  let price = 0;
+  const jsonLds = doc.querySelectorAll('script[type="application/ld+json"]');
+  jsonLds.forEach(script => {
+    try{
+      const data = JSON.parse(script.textContent);
+      const findPrice = (obj) => {
+        if(!obj || typeof obj !== 'object') return null;
+        if(obj.price !== undefined && obj.price !== null) return parseFloat(String(obj.price).replace(',','.'));
+        if(obj.offers){
+          if(Array.isArray(obj.offers)) return findPrice(obj.offers[0]);
+          return findPrice(obj.offers);
+        }
+        if(obj['@graph']){
+          for(const item of obj['@graph']){
+            const p = findPrice(item);
+            if(p) return p;
+          }
+        }
+        return null;
+      };
+      const p = findPrice(data);
+      if(p && !price) price = p;
+    }catch(e){}
+  });
+
+  if(!price){
+    const meta = doc.querySelector('meta[property="product:price:amount"]')?.content
+              || doc.querySelector('meta[property="og:price:amount"]')?.content;
+    if(meta) price = parseFloat(String(meta).replace(',','.'));
+  }
+
+  if(!price){
+    const html_text = html.replace(/\s+/g,' ');
+    const m = html_text.match(/"price"\s*:\s*"?([\d.]+)"?/);
+    if(m) price = parseFloat(m[1]);
+  }
+
+  let desc = doc.querySelector('meta[property="og:description"]')?.content
+          || doc.querySelector('meta[name="description"]')?.content
+          || '';
+  desc = desc.replace(/\s+/g,' ').trim().substring(0, 200);
+
+  let site = 'Otro';
+  if(url.includes('mercadolibre') || url.includes('mercadolivre')) site = 'Mercado Libre';
+  else if(url.includes('amazon')) site = 'Amazon';
+  else if(url.includes('aliexpress')) site = 'AliExpress';
+  else if(url.includes('walmart')) site = 'Walmart';
+  else if(url.includes('shein')) site = 'Shein';
+  else if(url.includes('temu')) site = 'Temu';
+  else if(url.includes('liverpool')) site = 'Liverpool';
+
+  return { title, image, price, desc, site, url };
+}
+
+function calcPrice(original){
+  const markup = parseFloat(document.getElementById('bulkMarkup').value) || 0;
+  const type = document.getElementById('bulkMarkupType').value;
+  if(type === 'percent') return Math.round(original * (1 + markup/100));
+  return Math.round(original + markup);
+}
+
+async function analyzeBulkLinks(){
+  const raw = document.getElementById('bulkLinks').value || '';
+  const links = raw.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
+  if(!links.length){ toast('❌ Pega al menos un link'); return; }
+
+  const preview = document.getElementById('bulkPreview');
+  const cat = document.getElementById('bulkCat').value || 'Otro';
+  const days = parseInt(document.getElementById('bulkDays').value) || 7;
+
+  bulkProducts = [];
+  preview.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text2);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><div style="margin-top:6px;font-size:.8rem;">Analizando ${links.length} productos...</div></div>`;
+
+  for(let i = 0; i < links.length; i++){
+    preview.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text2);"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;"></i><div style="margin-top:6px;font-size:.8rem;">Analizando ${i+1}/${links.length}...</div></div>`;
+    try{
+      const html = await fetchWithProxy(links[i]);
+      const parsed = parseProduct(html, links[i]);
+      bulkProducts.push({
+        ...parsed,
+        myPrice: parsed.price ? calcPrice(parsed.price) : 0,
+        days,
+        cat,
+        error: false
+      });
+    }catch(e){
+      bulkProducts.push({
+        title: '❌ No se pudo cargar',
+        image: '',
+        price: 0,
+        myPrice: 0,
+        desc: '',
+        site: 'Error',
+        url: links[i],
+        days,
+        cat,
+        error: true
+      });
+    }
+    await new Promise(r => setTimeout(r, 250));
+  }
+
+  renderBulkPreview();
+}
+
+function renderBulkPreview(){
+  const preview = document.getElementById('bulkPreview');
+  const valid = bulkProducts.filter(p => !p.error);
+  preview.innerHTML = bulkProducts.map((p, i) => `
+    <div class="bulk-row" ${p.error?'style="opacity:.6;"':''}>
+      <div class="bulk-thumb">${p.image?`<img src="${p.image}" onerror="this.parentElement.textContent='📦'">`:'📦'}</div>
+      <div class="bulk-info">
+        <div class="bulk-name">${p.title}</div>
+        <div class="bulk-meta">${p.site} · Original: $${fmt(p.price)}</div>
+        <div class="bulk-inputs">
+          <input type="number" value="${p.myPrice}" onchange="updateBulkPrice(${i}, this.value)" placeholder="Mi precio" style="width:85px;" title="Mi precio">
+          <input type="number" value="${p.days}" onchange="updateBulkDays(${i}, this.value)" placeholder="Días" style="width:50px;" title="Días de entrega">
+          <button class="bulk-del" onclick="removeBulkItem(${i})">×</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  const btn = document.getElementById('bulkImportBtn');
+  if(valid.length > 0){
+    btn.style.display = 'flex';
+    btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Importar ${valid.length} productos`;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+function updateBulkPrice(i, val){ if(bulkProducts[i]) bulkProducts[i].myPrice = parseFloat(val) || 0; }
+function updateBulkDays(i, val){ if(bulkProducts[i]) bulkProducts[i].days = parseInt(val) || 7; }
+function removeBulkItem(i){ bulkProducts.splice(i, 1); renderBulkPreview(); }
+
+async function confirmBulkImport(){
+  const valid = bulkProducts.filter(p => !p.error && p.myPrice > 0);
+  if(!valid.length){ toast('❌ Sin productos válidos'); return; }
+
+  const btn = document.getElementById('bulkImportBtn');
+  let imported = 0, failed = 0;
+
+  for(let i = 0; i < valid.length; i++){
+    const p = valid[i];
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Importando ${i+1}/${valid.length}...`;
+    try{
+      let images = [];
+      if(p.image){
+        try{
+          const imgRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(p.image));
+          const blob = await imgRes.blob();
+          const base64 = await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(blob);
+          });
+          const compressed = await compressImage(base64, 700, 0.6);
+          images = [compressed];
+        }catch(e){ images = []; }
+      }
+
+      const newProduct = {
+        name: p.title,
+        price: p.myPrice,
+        oldPrice: p.price > p.myPrice ? p.price : null,
+        cat: p.cat,
+        emoji: '📦',
+        stock: 10,
+        desc: p.desc || '',
+        variants: null,
+        isOffer: p.price > p.myPrice,
+        isNew: true,
+        isBest: false,
+        days: p.days || 7,
+        images: images
+      };
+
+      await db.collection("products").add(newProduct);
+      imported++;
+    }catch(e){ console.error('Error importando:', e); failed++; }
+  }
+
+  toast(`✅ ${imported} importados${failed?` · ${failed} fallaron`:''}`);
+  bulkProducts = [];
+  document.getElementById('bulkPreview').innerHTML = '';
+  document.getElementById('bulkLinks').value = '';
+  document.getElementById('bulkImportBtn').style.display = 'none';
+  loadProductsFromFirebase();
+  closeDrawers();
+}
 </script>
 </body>
 </html>

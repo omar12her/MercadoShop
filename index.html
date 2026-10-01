@@ -69,13 +69,18 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 .page.active{display:block}
 @keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .main{padding-bottom:20px}
-.car-wrap{position:relative;overflow:hidden;margin:10px 12px;border-radius:var(--r16);box-shadow:var(--shadow-lg)}
+.car-wrap{position:relative;overflow:hidden;margin:30px 12px 12px;border-radius:var(--r16);box-shadow:var(--shadow-lg)}
 .car-track{display:flex;transition:transform .6s ease}
-.car-slide{min-width:100%;height:160px;display:flex;align-items:center;padding:20px;overflow:hidden}
-.cs1{background:linear-gradient(135deg,#0D47A1,#1565C0,#1976D2)}
-.cs2{background:linear-gradient(135deg,#E65100,#FF6F00,#FF8F00)}
-.cs3{background:linear-gradient(135deg,#1B5E20,#2E7D32,#388E3C)}
-.car-txt{z-index:2;color:#fff}
+.car-slide{position:relative;min-width:100%;height:160px;display:flex;align-items:center;padding:20px;overflow:hidden}
+.cs1{background:radial-gradient(circle at 82% 18%,rgba(255,255,255,.35) 0%,rgba(255,255,255,0) 38%),radial-gradient(circle at 12% 88%,rgba(255,213,79,.55) 0%,rgba(255,213,79,0) 42%),radial-gradient(circle at 55% 55%,rgba(66,165,245,.45) 0%,rgba(66,165,245,0) 65%),linear-gradient(135deg,#0D47A1 0%,#1565C0 55%,#1E88E5 100%)}
+.cs2{background:radial-gradient(circle at 80% 22%,rgba(255,255,255,.35) 0%,rgba(255,255,255,0) 38%),radial-gradient(circle at 15% 85%,rgba(255,235,59,.55) 0%,rgba(255,235,59,0) 42%),radial-gradient(circle at 55% 55%,rgba(255,138,0,.5) 0%,rgba(255,138,0,0) 65%),linear-gradient(135deg,#E65100 0%,#FF6F00 55%,#FF9800 100%)}
+.cs3{background:radial-gradient(circle at 82% 20%,rgba(255,255,255,.32) 0%,rgba(255,255,255,0) 38%),radial-gradient(circle at 14% 86%,rgba(174,213,129,.5) 0%,rgba(174,213,129,0) 42%),radial-gradient(circle at 55% 55%,rgba(67,160,71,.5) 0%,rgba(67,160,71,0) 65%),linear-gradient(135deg,#1B5E20 0%,#2E7D32 55%,#43A047 100%)}
+.car-slide::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.18) 1.2px,transparent 1.2px);background-size:16px 16px;opacity:.6;pointer-events:none}
+.car-slide::after{position:absolute;right:-8px;bottom:-22px;font-size:8rem;line-height:1;opacity:.22;transform:rotate(-14deg);pointer-events:none;filter:drop-shadow(0 6px 12px rgba(0,0,0,.15))}
+.car-slide:nth-child(1)::after{content:'🎧'}
+.car-slide:nth-child(2)::after{content:'👟'}
+.car-slide:nth-child(3)::after{content:'🔧'}
+.car-txt{position:relative;z-index:2;color:#fff}
 .car-txt h2{font-size:1.2rem;font-weight:900}
 .car-txt p{font-size:.78rem;opacity:.9;margin:6px 0 10px}
 .btn-slide{background:#fff;font-size:.74rem;font-weight:700;padding:7px 16px;border-radius:var(--r50);color:var(--blue)}
@@ -261,7 +266,7 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
   </div>
 </div>
 <div class="free-ship-bar" id="freeShipBar">
-  🚚 <span id="freeShipText">Agrega $350.00 más para envío GRATIS</span>
+  🚚 <span id="freeShipText">Agrega $350.00 más y obtén envío GRATIS</span>
   <div class="progress-wrap"><div class="progress-fill" id="freeShipProgress"></div></div>
 </div>
 <div class="ticker-bar">
@@ -703,7 +708,7 @@ function updateFreeShipBar(){
   const falta=FREE_SHIP_MIN-total;
   const bar=document.getElementById('freeShipBar'),txt=document.getElementById('freeShipText'),prog=document.getElementById('freeShipProgress');
   if(total>=FREE_SHIP_MIN){bar.classList.add('complete');txt.textContent='🎉 ¡ENVÍO GRATIS!';prog.style.width='100%'}
-  else{bar.classList.remove('complete');txt.textContent=`🚚 Agrega $${fmt(falta)} más para envío GRATIS (costo: $${SHIP_COST})`;prog.style.width=Math.min(100,(total/FREE_SHIP_MIN)*100)+'%'}
+  else{bar.classList.remove('complete');txt.textContent=`🚚 Agrega $${fmt(falta)} o más y obtén envío GRATIS`;prog.style.width=Math.min(100,(total/FREE_SHIP_MIN)*100)+'%'}
 }
 function initCarousel(){const s=document.querySelectorAll('.car-slide'),d=document.getElementById('carDots');s.forEach((_,i)=>{const o=document.createElement('div');o.className='cdot'+(i===0?' active':'');o.onclick=()=>goSlide(i);d.appendChild(o)});carTimer=setInterval(()=>goSlide((carIdx+1)%s.length),4000)}
 function goSlide(i){carIdx=i;document.getElementById('carTrack').style.transform=`translateX(-${i*100}%)`;document.querySelectorAll('.cdot').forEach((d,x)=>d.classList.toggle('active',x===i))}

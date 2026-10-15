@@ -165,7 +165,6 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 .det-btns{display:flex;gap:8px;margin-top:12px;}
 .btn-cart{flex:1;min-width:100px;background:var(--orange);color:#fff;font-size:.85rem;font-weight:700;padding:13px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:6px}
 .btn-wa{flex:1;min-width:100px;background:var(--green);color:#fff;font-size:.85rem;font-weight:700;padding:13px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:6px}
-/* Botón compartir destacado */
 .btn-share-top{width:100%;background:var(--purple);color:#fff;font-size:.9rem;font-weight:700;padding:14px;border-radius:var(--r8);display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 4px;cursor:pointer;transition:all var(--transition);}
 .btn-share-top:hover{background:var(--purple-dark);box-shadow:0 4px 15px rgba(124,58,237,0.4);}
 .btn-share-top:active{transform:scale(0.97);}
@@ -340,6 +339,7 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
     <div class="acard" onclick="openDrawer('drawerAddProd')"><i class="fas fa-plus-circle"></i><span>Agregar</span></div>
     <div class="acard" onclick="showAdminSub('pedidos')"><i class="fas fa-receipt"></i><span>Pedidos</span></div>
     <div class="acard" onclick="openDrawer('drawerAnuncio')"><i class="fas fa-bullhorn"></i><span>Anuncio</span></div>
+    <div class="acard" onclick="openDrawer('drawerBulk')"><i class="fas fa-bolt" style="color:var(--orange)"></i><span>Carga Masiva</span></div>
   </div>
   <div class="sh"><span class="sh-title">Productos</span></div><div style="padding:0 12px 20px;" id="adminProdList"></div>
 </div>
@@ -451,6 +451,15 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
     <button class="btn-add" style="margin-top:8px;border-radius:var(--r8);padding:14px;width:100%;background:var(--red-pale);color:var(--red);font-size:.9rem;" onclick="eliminarAnuncio()"><i class="fas fa-trash"></i> Quitar Anuncio</button>
   </div>
 </div>
+<div class="drawer" id="drawerBulk"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">⚡ Subir en Lote (De jalón)</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div>
+  <div style="padding:0 16px 30px;">
+    <label class="flabel">Categoría para estos productos *</label>
+    <select class="fselect" id="bulkCat"><option value="">Seleccionar...</option></select>
+    <label class="flabel">Pega aquí el código de productos *</label>
+    <textarea class="finput" id="bulkJson" rows="6" placeholder='[{"name":"Producto...","price":350...}]'></textarea>
+    <button class="btn-add" style="margin-top:14px;border-radius:var(--r8);padding:14px;width:100%;background:var(--orange);font-size:.9rem;" onclick="runBulkUpload()"><i class="fas fa-cloud-upload-alt"></i> Subir todos a Firebase</button>
+  </div>
+</div>
 <div class="drawer" id="drawerAdminLogin"><div class="dhandle"></div><div class="dhdr"><span class="dtitle">🔐 Admin</span><button class="xbtn" onclick="closeDrawers()"><i class="fas fa-times"></i></button></div>
   <div style="padding:20px;text-align:center;">
     <div style="width:60px;height:60px;border-radius:50%;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.6rem;">🔒</div>
@@ -511,7 +520,6 @@ function loadProductsFromFirebase(){
     products=[]; snap.forEach(doc => products.push({id:doc.id,...doc.data()}));
     if(!products.length) loadDefaultProducts();
     refreshAll();
-    // 🆕 ABRIR PRODUCTO DESDE URL COMPARTIDA
     checkSharedProduct();
   }).catch(() => { loadDefaultProducts(); refreshAll(); checkSharedProduct(); });
 }
@@ -647,7 +655,7 @@ window.addEventListener('load',()=>{
   orders=JSON.parse(localStorage.getItem('ms_orders')||'[]'); profile=JSON.parse(localStorage.getItem('ms_profile')||'{}');
   loadProductsFromFirebase(); buildCatNav(); buildCatGrid(); updateBadge(); loadProfile(); initCarousel(); buildRoutesMini(); updateFreeShipBar();
   loadAnuncio();
-  CATS.forEach(c=>{['nCat','eCat'].forEach(id=>{const sel=document.getElementById(id);if(sel){const o=document.createElement('option');o.value=c.id;o.textContent=c.icon+' '+c.id;sel.appendChild(o)}})});
+  CATS.forEach(c=>{['nCat','eCat','bulkCat'].forEach(id=>{const sel=document.getElementById(id);if(sel){const o=document.createElement('option');o.value=c.id;o.textContent=c.icon+' '+c.id;sel.appendChild(o)}})});
   isAdmin=sessionStorage.getItem('ms_admin')==='1'; updateAdminUI();
   document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
   
@@ -948,6 +956,43 @@ async function saveEdit(){
   db.collection("products").doc(id).update(updatedData)
     .then(()=>{toast('✅ Producto actualizado');loadProductsFromFirebase();closeDrawers();})
     .catch((e)=>{console.error(e);toast('❌ Error al actualizar');});
+}
+
+async function runBulkUpload(){
+  const cat = document.getElementById('bulkCat').value;
+  const raw = document.getElementById('bulkJson').value.trim();
+  if(!cat || !raw){ toast('❌ Elige categoría y pega los datos'); return; }
+  try {
+    const items = JSON.parse(raw);
+    toast(`⏳ Subiendo ${items.length} productos...`);
+    const batch = db.batch();
+    items.forEach(item => {
+      const docRef = db.collection("products").doc();
+      batch.set(docRef, {
+        name: item.name,
+        price: Number(item.price),
+        oldPrice: item.oldPrice ? Number(item.oldPrice) : null,
+        cat: cat,
+        emoji: item.emoji || '📦',
+        stock: Number(item.stock) || 12,
+        desc: item.desc || 'Excelente calidad y diseño.',
+        variants: item.variants || null,
+        isOffer: Boolean(item.isOffer),
+        isNew: true,
+        isBest: Boolean(item.isBest),
+        days: 7,
+        images: item.images || []
+      });
+    });
+    await batch.commit();
+    toast(`✅ ¡${items.length} productos subidos de jalón!`);
+    document.getElementById('bulkJson').value = '';
+    closeDrawers();
+    loadProductsFromFirebase();
+  } catch(e) {
+    console.error(e);
+    toast('❌ Error en el formato de la lista');
+  }
 }
 
 function refreshAll(){buildOffers();buildBest();buildNew();buildCatGrid();renderAdminList();document.getElementById('adminProdCount').textContent=products.length}

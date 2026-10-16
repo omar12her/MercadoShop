@@ -41,7 +41,7 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 .lightbox .lb-prev,.lightbox .lb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);color:#fff;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;z-index:10}
 .lightbox .lb-prev{left:10px}
 .lightbox .lb-next{right:10px}
-.det-gallery{position:relative;height:300px;background:#fff;overflow:hidden;touch-action:pan-y;border-bottom:1px solid var(--border)}
+.det-gallery{position:relative;height:260px;background:#fff;overflow:hidden;touch-action:pan-y;border-bottom:1px solid var(--border)}
 .det-gallery-track{display:flex;height:100%;transition:transform .5s ease}
 .det-gallery-slide{min-width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;cursor:pointer}
 .det-gallery-slide img{width:100%;height:100%;object-fit:contain}
@@ -282,12 +282,6 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
     <span class="ticker-item"><span class="dot"></span> 🚚 Envío gratis en pedidos +$350</span>
     <span class="ticker-item"><span class="dot"></span> 📍 Entregamos personalmente en tu comunidad</span>
     <span class="ticker-item"><span class="dot"></span> 📱 ¿Dudas? Escríbenos por WhatsApp</span>
-    <span class="ticker-item"><i class="fas fa-hand-holding-usd"></i> Anticipo del 50% para confirmar pedido</span>
-    <span class="ticker-item"><span class="dot"></span> Pago por transferencia u OXXO</span>
-    <span class="ticker-item"><span class="dot"></span> 🚫 No se aceptan devoluciones ni cambios</span>
-    <span class="ticker-item"><span class="dot"></span> 🚚 Envío gratis en pedidos +$350</span>
-    <span class="ticker-item"><span class="dot"></span> 📍 Entregamos personalmente en tu comunidad</span>
-    <span class="ticker-item"><span class="dot"></span> 📱 ¿Dudas? Escríbenos por WhatsApp</span>
   </div>
 </div>
 <nav class="catnav"><div class="catnav-inner" id="catNavEl"></div></nav>
@@ -508,11 +502,11 @@ let lbPanStartX = 0, lbPanStartY = 0, lbPanTranslateX = 0, lbPanTranslateY = 0;
 let lbIsPanning = false, lbIsPinching = false;
 let touchStartX = 0, touchStartY = 0, touchMoved = false;
 
-function compressImage(base64, maxWidth=800, quality=0.6){
+function compressImage(base64, maxWidth=800, quality=0.5){
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = function(){
-      if(base64.length < 50000){ resolve(base64); return; }
+      if(base64.length < 40000){ resolve(base64); return; }
       const canvas = document.createElement('canvas');
       let width = img.width, height = img.height;
       if(width > maxWidth){ height = (height * maxWidth) / width; width = maxWidth; }
@@ -738,7 +732,7 @@ function buildOffers(){const e=document.getElementById('offersRow');if(!e)return
 function buildScrollGrid(id,list){
   const e=document.getElementById(id);
   if(!e)return;
-  const limitedList = list.slice(0, 20);
+  const limitedList = list.slice(0, 10);
   if(!limitedList.length){
     e.innerHTML='<div class="empty" style="width:100%;text-align:center;"><i class="fas fa-box-open"></i><p>Pronto más</p></div>';
     return;
@@ -762,7 +756,7 @@ function buildAllCatalog(){buildCatalogGrid('allCatalogGrid',products)}
 
 function getImg(p) {
   if (p.images && p.images.length > 0) {
-    return `<img src="${p.images[0]}" loading="lazy" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;">`;
+    return `<img src="${p.images[0]}" loading="lazy" decoding="async" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;">`;
   }
   return p.emoji || '📦';
 }
@@ -805,12 +799,11 @@ function prodCard(p){
   </div>`;
 }
 
-// ESTRUCTURA ESTILO MERCADO LIBRE: FOTO -> TÍTULO/PRECIO -> VARIANTES -> BOTONES DE COMPRA -> DESCRIPCIÓN -> RELACIONADOS
 function openProd(id){
   curProd=products.find(p=>String(p.id)===String(id));if(!curProd)return;
   detQty=1;galleryIdx=0;selectedVariants={};const p=curProd,imgs=(p.images&&p.images.length>0)?p.images:[p.emoji||'📦'];
   const imgsEscaped=JSON.stringify(imgs).replace(/"/g,'&quot;');
-  const slides=imgs.map((img,i)=>img.startsWith('data:')||img.startsWith('http')?`<div class="det-gallery-slide"><img src="${img}" alt="${p.name}" onclick="event.stopPropagation();openLightbox(${imgsEscaped},${i})"></div>`:`<div class="det-gallery-slide" style="font-size:5rem;" onclick="event.stopPropagation();openLightbox(${imgsEscaped},${i})">${img}</div>`).join('');
+  const slides=imgs.map((img,i)=>img.startsWith('data:')||img.startsWith('http')?`<div class="det-gallery-slide"><img src="${img}" alt="${p.name}" loading="lazy" onclick="event.stopPropagation();openLightbox(${imgsEscaped},${i})"></div>`:`<div class="det-gallery-slide" style="font-size:5rem;" onclick="event.stopPropagation();openLightbox(${imgsEscaped},${i})">${img}</div>`).join('');
   const dots=imgs.length>1?imgs.map((_,i)=>`<div class="gallery-dot ${i===0?'active':''}" onclick="goGallerySlide(${i})"></div>`).join(''):'';
   const nav=imgs.length>1?`<button class="gallery-nav gallery-prev" onclick="goGallerySlide(galleryIdx-1)"><i class="fas fa-chevron-left"></i></button><button class="gallery-nav gallery-next" onclick="goGallerySlide(galleryIdx+1)"><i class="fas fa-chevron-right"></i></button>`:'';
   const freeShip=p.price>=FREE_SHIP_MIN;
@@ -833,7 +826,6 @@ function openProd(id){
     variantsHtml+='</div>';
   }
 
-  // Filtrar productos relacionados por la misma categoría (excluyendo el actual)
   const relProducts = products.filter(x => x.cat === p.cat && String(x.id) !== String(p.id)).slice(0, 10);
   let relatedHtml = '';
   if(relProducts.length > 0){
@@ -846,18 +838,21 @@ function openProd(id){
       </div>`;
   }
 
-  document.getElementById('prodDetailContent').innerHTML=`
+  const drawerEl = document.getElementById('drawerProd');
+  drawerEl.scrollTop = 0;
+
+  drawerEl.innerHTML=`
+    <div class="dhandle"></div>
     <div class="det-gallery" id="detGallery"><div class="det-gallery-track" id="galleryTrack">${slides}</div>${nav}${dots?`<div class="gallery-dots" id="galleryDots">${dots}</div>`:''}${p.oldPrice?`<div class="disc" style="position:absolute;top:10px;left:10px;z-index:6;">-${pct(p.price,p.oldPrice)}%</div>`:''}</div>
     <div class="det-body">
       <div style="display:flex;justify-content:space-between;align-items:start;"><div class="det-name" style="flex:1;margin-right:8px;">${p.name}</div><button onclick="toggleFavDirect('${p.id}')" style="font-size:1.4rem;color:${favs.includes(String(p.id))?'var(--red)':'var(--border)'};flex-shrink:0;">♥</button></div>
       <div class="det-price">$${fmt(p.price)}</div>${p.oldPrice?`<div class="det-old">Antes: $${fmt(p.oldPrice)}</div>`:''}
-      ${freeShip?`<div class="free-ship-badge"><i class="fas fa-truck"></i> ¡ENVÍO GRATIS!</div>`:`<div style="color:var(--text2);font-size:.74rem;margin:4px 0;">🚚 Envío: $${SHIP_COST} (gratis +$${fmt(FREE_SHIP_MIN)})</div>`}
+      ${freeShip?`<div class="free-ship-badge"><i class="fas fa-truck"></i> ¡ENVÍO GRATIS!</div>`:`<div style="color:var(--text2);font-size:.74rem;margin:6px 0;">🚚 Envío: $${SHIP_COST} (gratis +$${fmt(FREE_SHIP_MIN)})</div>`}
       <div class="advance-badge"><i class="fas fa-hand-holding-usd"></i> Anticipo 50% para confirmar</div>
       <div class="no-return-badge"><i class="fas fa-exclamation-triangle"></i> No se aceptan devoluciones</div>
       ${variantsHtml}
       <div class="qty-row" style="margin:10px 0;"><span style="font-weight:600;">Cantidad:</span><div class="qty-ctrl"><div class="qbtn" onclick="chgQty(-1)">−</div><div class="qnum" id="detQtyEl">1</div><div class="qbtn" onclick="chgQty(1)">+</div></div></div>
       
-      <!-- BOTONES DE COMPRA ESTILO MERCADO LIBRE (ARRIBA) -->
       <div class="det-btns">
         <button class="btn-wa" onclick="directWA('${p.id}')"><i class="fab fa-whatsapp"></i> Pedir por WhatsApp</button>
         <button class="btn-cart" onclick="addCartFromDetail()"><i class="fas fa-cart-plus"></i> Agregar al carrito</button>
@@ -874,7 +869,10 @@ function openProd(id){
 
       ${relatedHtml}
     </div>`;
-  setTimeout(() => attachGallerySwipe(), 100);
+  setTimeout(() => {
+    drawerEl.scrollTop = 0;
+    attachGallerySwipe();
+  }, 50);
   openDrawer('drawerProd');
 }
 

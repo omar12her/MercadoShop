@@ -105,12 +105,10 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
 .oold{font-size:.64rem;color:var(--muted);text-decoration:line-through}
 .btn-mini{width:100%;background:var(--blue);color:#fff;font-size:.7rem;font-weight:700;padding:7px;border-radius:var(--r4);margin-top:5px}
 
-/* CARRUSELES HORIZONTALES PARA EL INICIO (MÁXIMO 20 PRODUCTOS) */
 .pgrid-scroll{display:flex;gap:10px;padding:0 12px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
 .pgrid-scroll::-webkit-scrollbar{display:none}
 .pcard-scroll{min-width:155px;max-width:155px;background:var(--surface);border-radius:var(--r12);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;border:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 
-/* CUADRÍCULA VERTICAL PARA SCROLL HACIA ABAJO (TODOS LOS PRODUCTOS) */
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:0 12px;width:100%}
 @media(min-width:400px){.pgrid{grid-template-columns:repeat(2,1fr)}}
 .pcard{background:var(--surface);border-radius:var(--r12);overflow:hidden;box-shadow:var(--shadow);cursor:pointer;border:1px solid var(--border);display:flex;flex-direction:column}
@@ -327,14 +325,14 @@ input,select,textarea{font-family:'Inter',sans-serif;font-size:16px}
     <div class="sh"><span class="sh-title">Recién llegados (Desliza →)</span></div>
     <div class="pgrid-scroll" id="newGrid"></div>
 
-    <!-- SECCIÓN VERTICAL PARA HACER SCROLL HACIA ABAJO Y VER TODO EL CATÁLOGO -->
-    <div class="sh"><span class="sh-title">Catálogo Completo (Explora hacia abajo)</span></div>
+    <!-- CATÁLOGO VERTICAL PARA HACER SCROLL HACIA ABAJO -->
+    <div class="sh"><span class="sh-title">Catálogo Completo (Desliza hacia abajo)</span></div>
     <div class="pgrid" id="allCatalogGrid" style="padding-bottom:30px;"></div>
   </div>
 </div>
 
 <div class="page" id="page-buscar"><div class="sh"><span class="sh-title" id="searchTitle">Resultados</span><span class="sh-link" onclick="goHome()">← Volver</span></div><div style="padding:0 12px 20px;" id="searchResults"></div></div>
-<div class="page" id="page-categorias"><div class="sh"><span class="sh-title">Categorías</span></div><div class="cgrid" id="allCatGrid" style="grid-template-columns:repeat(3,minmax(0,1fr));padding-bottom:20px;"></div></div>
+<div class="page" id="page-categorias"><div class="sh"><span class="sh-title">Categorías</span><span class="sh-link" onclick="goHome()">← Volver</span></div><div class="cgrid" id="allCatGrid" style="grid-template-columns:repeat(3,minmax(0,1fr));padding-bottom:20px;"></div></div>
 <div class="page" id="page-perfil"><div class="main"><div class="prof-sec">
   <div class="prof-av" id="profAv">👤</div><div class="prof-name" id="profName">Invitado</div><div class="prof-sub" id="profSub">Guarda tus datos</div>
   <label class="flabel">Nombre</label><input type="text" class="finput" id="inName">
@@ -675,8 +673,9 @@ window.addEventListener('load',()=>{
   document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});
   
   window.addEventListener('popstate', function(e) {
-    if (document.querySelector('.drawer.show')) {
+    if (document.querySelector('.drawer.show') || document.getElementById('lightbox').classList.contains('show')) {
       closeDrawers();
+      closeLightbox();
     } else if (!document.getElementById('page-home').classList.contains('active')) {
       goHome();
     } else {
@@ -738,7 +737,7 @@ function buildCatNav(){const e=document.getElementById('catNavEl');e.innerHTML='
 function buildCatGrid(){const h=CATS.map(c=>`<div class="citem" onclick="filterCat('${c.id}')"><div class="cicon">${c.icon}</div><div class="clabel">${c.id}</div></div>`).join('');const g=document.getElementById('catGrid');if(g)g.innerHTML=h;const ag=document.getElementById('allCatGrid');if(ag)ag.innerHTML=h}
 function buildOffers(){const e=document.getElementById('offersRow');if(!e)return;const list=products.filter(p=>p.isOffer);e.innerHTML=list.length?list.map(p=>`<div class="ocard" onclick="openProd('${p.id}')"><div class="oimg">${getImg(p)}${p.oldPrice?`<div class="disc">-${pct(p.price,p.oldPrice)}%</div>`:''}</div><div class="oinfo"><div class="oname">${p.name}</div><div class="oprice">$${fmt(p.price)}</div>${p.oldPrice?`<div class="oold">$${fmt(p.oldPrice)}</div>`:''}<button class="btn-mini" onclick="event.stopPropagation();addCart('${p.id}')">+ Agregar</button></div></div>`).join(''):'<div class="empty"><p>Pronto más</p></div>'}
 
-// MÁXIMO 20 PRODUCTOS PARA SCROLL HORIZONTAL
+// MÁXIMO 20 PRODUCTOS PARA SCROLL HORIZONTAL EN INICIO
 function buildScrollGrid(id,list){
   const e=document.getElementById(id);
   if(!e)return;
@@ -848,7 +847,7 @@ function openProd(id){
       <div class="det-desc">${p.desc||''}</div>
       ${p.stock<=5?`<div style="background:var(--orange-pale);color:var(--orange);padding:8px;border-radius:var(--r4);margin:8px 0;font-weight:600;font-size:.78rem;">⚠️ ¡Solo quedan ${p.stock}!</div>`:''}
       <div style="color:var(--green-dark);font-size:.78rem;font-weight:600;margin:4px 0;">⏱️ Entrega estimada: ~${p.days||7} días</div>
-      <div class="qty-row"><span style="font-weight:600;">Cantidad:</span><div class="qty-ctrl"><div class="qbtn" onclick="chgQty(-1)">−</div><div class="qnum" id="detQtyEl">1</div><div class="qbtn" onclick="chgQty(1)">+</div></div></div>
+      <div class="qty-row"><span style="font-weight:600;>Cantidad:</span><div class="qty-ctrl"><div class="qbtn" onclick="chgQty(-1)">−</div><div class="qnum" id="detQtyEl">1</div><div class="qbtn" onclick="chgQty(1)">+</div></div></div>
       <div class="det-btns">
         <button class="btn-cart" onclick="addCartFromDetail()"><i class="fas fa-cart-plus"></i> Agregar</button>
         <button class="btn-wa" onclick="directWA('${p.id}')"><i class="fab fa-whatsapp"></i> Pedir</button>
@@ -1072,7 +1071,7 @@ function refreshAll(){buildOffers();buildBest();buildNew();buildAllCatalog();bui
 function renderAdminList(){const e=document.getElementById('adminProdList');if(!e)return;e.innerHTML=products.map(p=>`<div class="aprod-item"><div class="aprod-img">${getImg(p)}</div><div class="aprod-info"><div class="aprod-name">${p.name}</div><div class="aprod-sub">${p.cat} · Stock: ${p.stock} · 🖼️ ${(p.images||[]).length} · ⏱️${p.days||7}d</div><div class="aprod-price">$${fmt(p.price)}</div></div><button class="btn-edit" onclick="editProduct('${p.id}')">Editar</button><button class="btn-del" onclick="deleteProduct('${p.id}')">Del</button></div>`).join('')}
 function showAdminSub(id){if(!isAdmin)return;const e=document.getElementById('adminProdList');if(!e)return;if(!orders.length){e.innerHTML='<div class="empty"><p>Sin pedidos</p></div>';return}e.innerHTML=orders.map(o=>`<div style="background:var(--surface);border-radius:var(--r8);border:1px solid var(--border);padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;"><span style="font-weight:700;">#${String(o.id).slice(-6)} - ${o.name}</span><span style="color:var(--orange);font-size:.75rem;">${o.status}</span></div><div style="font-size:.75rem;color:var(--text2);">${o.community} · ${o.date}</div><div style="font-weight:800;color:var(--blue);">Total: $${fmt(o.total)}</div></div>`).join('');document.getElementById('adminOrderCount').textContent=orders.length}
 function renderOrderHistory(){const e=document.getElementById('orderHistory');if(!e)return;if(!orders.length){e.innerHTML='<div class="empty"><i class="fas fa-box"></i><p>Sin pedidos</p></div>';return}e.innerHTML=orders.map(o=>`<div style="background:var(--surface);border-radius:var(--r8);border:1px solid var(--border);padding:10px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;"><span style="font-weight:700;">Pedido #${String(o.id).slice(-6)}</span><span style="color:var(--orange);font-size:.75rem;">${o.status}</span></div><div style="font-size:.75rem;color:var(--text2);">${o.date}</div><div style="font-weight:800;color:var(--blue);">Total: $${fmt(o.total)}</div></div>`).join('')}
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const el=document.getElementById('page-'+id);if(el)el.classList.add('active');const nm={home:'navHome',categorias:'navCat',perfil:'navPerfil'};document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));if(nm[id])document.getElementById(nm[id])?.classList.add('active');window.scrollTo(0,0);if(id==='admin'){if(!isAdmin){openAdminLogin();return}renderAdminList();document.getElementById('adminProdCount').textContent=products.length;document.getElementById('adminOrderCount').textContent=orders.length}if(id==='pedidos-hist')renderOrderHistory()}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));const el=document.getElementById('page-'+id);if(el)el.classList.add('active');const nm={home:'navHome',categorias:'navCat',perfil:'navPerfil'};document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('active'));if(nm[id])document.getElementById(nm[id])?.classList.add('active');window.scrollTo(0,0);history.pushState({page:id},'',window.location.href);if(id==='admin'){if(!isAdmin){openAdminLogin();return}renderAdminList();document.getElementById('adminProdCount').textContent=products.length;document.getElementById('adminOrderCount').textContent=orders.length}if(id==='pedidos-hist')renderOrderHistory()}
 function goHome(){document.getElementById('searchInput').value='';showPage('home');document.getElementById('navHome').classList.add('active')}
 function openDrawer(id){document.getElementById('overlay').classList.add('show');document.getElementById(id).classList.add('show');document.body.style.overflow='hidden';history.pushState({drawerOpen:true},'',window.location.href)}
 function closeDrawers(){document.querySelectorAll('.drawer').forEach(d=>d.classList.remove('show'));document.getElementById('overlay').classList.remove('show');document.body.style.overflow='';detQty=1;selectedVariants={}}
